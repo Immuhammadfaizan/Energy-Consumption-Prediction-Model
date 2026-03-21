@@ -1,0 +1,35 @@
+|====================================|
+| Energy Prediction Page Information |
+|====================================|
+
+This page allows users to generate advanced energy consumption forecasts using a Random Forest machine learning model.
+
+Key Features:
+-------------
+1. Random Forest ML Model:
+   - Uses 100 decision trees trained on 300 samples.
+   - Considers historical data (Weekly, Monthly, Yearly kWh).
+   - Integrates live meteorological data for higher accuracy.
+
+2. Live Weather Integration:
+   - Fetches real-time data from Open-Meteo API.
+   - Factors: Temperature, Humidity, Wind Speed, Precipitation, and Cloud Cover.
+   - Shows live weather context for the selected city.
+
+3. Interactive Visualizations:
+   - Dynamic Chart.js graphs (Bar, Line, Radar).
+   - Real-time comparison between predicted kWh and temperature trends.
+   - Modern sleek loaders and animated transitions.
+
+4. Feature Importance Analysis:
+   - Displays exactly how the model made its decision.
+   - Highlights the impact of different features (Weather vs. Historical Patterns).
+
+5. Persistent Prediction History:
+   - Save and view past predictions in a slide-out sidebar.
+   - One-click "Restore" to re-examine historical forecasts with full chart details.
+
+6. Professional UX:
+   - Responsive design for all devices.
+   - Glassmorphism UI elements and smooth animations.
+   - Offline detection to handle connectivity issues gracefully.

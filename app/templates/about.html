@@ -1,0 +1,791 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About · FLUX</title>
+    <link rel="stylesheet" href="/static/css/headfoot.css" />
+    <link rel="stylesheet" href="/static/css/about.css" />
+    {% include "auth_bridge.html" %}
+  </head>
+
+  <body>
+    {% include "header.html" %}
+
+    <!-- HERO SECTION -->
+    <section class="hero hero-about">
+      <div class="container">
+        <h1>About FLUX</h1>
+        <p>Empowering Pakistan's energy sector with intelligent forecasting</p>
+      </div>
+    </section>
+
+    <!-- MAIN CONTENT -->
+    <section class="section">
+      <div class="container">
+        <!-- OUR MISSION -->
+        <h2>Our Mission</h2>
+        <div class="about-card" style="padding: 32px 40px; margin-bottom: 40px">
+          <p
+            style="
+              font-size: 1.15em;
+              line-height: 1.8;
+              margin: 0;
+              color: var(--text-primary);
+              text-align: center;
+            "
+          >
+            FLUX is committed to revolutionizing energy management
+            across Pakistan by leveraging cutting edge artificial intelligence
+            and real time meteorological data. We enable organizations to
+            understand, predict, and optimize their energy consumption patterns
+            with unprecedented accuracy.
+          </p>
+        </div>
+
+        <!-- TECHNOLOGY STACK -->
+        <h2>Technology Stack</h2>
+        <div class="about-grid">
+          <div class="about-card">
+            <div class="card-icon">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"
+                ></path>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+              </svg>
+            </div>
+            <h3>Machine Learning</h3>
+            <p>
+              Advanced algorithms analyze historical consumption data and
+              patterns to generate precise energy forecasts. Our models
+              continuously improve with new data from your facility.
+            </p>
+          </div>
+          <div class="about-card">
+            <div class="card-icon">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"></path>
+              </svg>
+            </div>
+            <h3>Weather Integration</h3>
+            <p>
+              Integration with Open-Meteo's free weather API provides real time
+              temperature, humidity, and atmospheric data that directly impacts
+              energy consumption patterns.
+            </p>
+          </div>
+          <div class="about-card">
+            <div class="card-icon">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="18" y1="20" x2="18" y2="10"></line>
+                <line x1="12" y1="20" x2="12" y2="4"></line>
+                <line x1="6" y1="20" x2="6" y2="14"></line>
+              </svg>
+            </div>
+            <h3>Data Analytics</h3>
+            <p>
+              Comprehensive analytics dashboards visualize consumption trends
+              across weekly, monthly, and yearly intervals, enabling data driven
+              decision making.
+            </p>
+          </div>
+          <div class="about-card">
+            <div class="card-icon">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+            </div>
+            <h3>Enterprise Security</h3>
+            <p>
+              Your organization's data is protected with secure authentication,
+              encrypted storage, and role based access control through our admin
+              panel.
+            </p>
+          </div>
+          <div class="about-card">
+            <div class="card-icon">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polygon
+                  points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"
+                ></polygon>
+              </svg>
+            </div>
+            <h3>Real time Predictions</h3>
+            <p>
+              Get instant energy forecasts for your facility based on current
+              weather conditions, historical usage patterns, and facility
+              parameters.
+            </p>
+          </div>
+          <div class="about-card">
+            <div class="card-icon">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path
+                  d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+                ></path>
+              </svg>
+            </div>
+            <h3>Multi City Coverage</h3>
+            <p>
+              Full coverage of Pakistan's major and minor cities with precise
+              geographic coordinates for hyperlocal predictions tailored to your
+              region.
+            </p>
+          </div>
+        </div>
+
+        <!-- COVERAGE MAP -->
+        <h2>Pakistan Energy Coverage</h2>
+        <div class="about-card">
+          <p>
+            We provide comprehensive coverage for all major and emerging
+            industrial clusters across the country:
+          </p>
+          <div class="coverage-grid">
+            <div class="city-badge">
+              <span class="city-name"
+                ><svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"
+                  ></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                Karachi</span
+              >
+              <span class="city-coords">24.8607°N, 67.0011°E</span>
+            </div>
+            <div class="city-badge">
+              <span class="city-name"
+                ><svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"
+                  ></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                Lahore</span
+              >
+              <span class="city-coords">31.5497°N, 74.3436°E</span>
+            </div>
+            <div class="city-badge">
+              <span class="city-name"
+                ><svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"
+                  ></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                Islamabad</span
+              >
+              <span class="city-coords">33.6844°N, 73.0479°E</span>
+            </div>
+            <div class="city-badge">
+              <span class="city-name"
+                ><svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"
+                  ></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                Rawalpindi</span
+              >
+              <span class="city-coords">33.5731°N, 73.1815°E</span>
+            </div>
+            <div class="city-badge">
+              <span class="city-name"
+                ><svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"
+                  ></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                Faisalabad</span
+              >
+              <span class="city-coords">31.5497°N, 74.3436°E</span>
+            </div>
+            <div class="city-badge">
+              <span class="city-name"
+                ><svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"
+                  ></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                Multan</span
+              >
+              <span class="city-coords">30.1575°N, 71.4252°E</span>
+            </div>
+            <div class="city-badge">
+              <span class="city-name"
+                ><svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"
+                  ></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                Hyderabad</span
+              >
+              <span class="city-coords">25.3960°N, 68.3578°E</span>
+            </div>
+            <div class="city-badge">
+              <span class="city-name"
+                ><svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"
+                  ></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                Peshawar</span
+              >
+              <span class="city-coords">34.0151°N, 71.5249°E</span>
+            </div>
+            <div class="city-badge">
+              <span class="city-name"
+                ><svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"
+                  ></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                Quetta</span
+              >
+              <span class="city-coords">30.1798°N, 66.9750°E</span>
+            </div>
+            <div class="city-badge">
+              <span class="city-name"
+                ><svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"
+                  ></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                Gilgit</span
+              >
+              <span class="city-coords">35.9271°N, 74.3149°E</span>
+            </div>
+            <div class="city-badge">
+              <span class="city-name"
+                ><svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"
+                  ></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                Sialkot</span
+              >
+              <span class="city-coords">32.4914°N, 74.5347°E</span>
+            </div>
+            <div class="city-badge">
+              <span class="city-name"
+                ><svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"
+                  ></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                Gujranwala</span
+              >
+              <span class="city-coords">32.1814°N, 74.1857°E</span>
+            </div>
+            <div class="city-badge">
+              <span class="city-name"
+                ><svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"
+                  ></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                Sargodha</span
+              >
+              <span class="city-coords">32.0840°N, 72.6711°E</span>
+            </div>
+            <div class="city-badge">
+              <span class="city-name"
+                ><svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"
+                  ></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                Bahawalpur</span
+              >
+              <span class="city-coords">29.1938°N, 71.6858°E</span>
+            </div>
+            <div class="city-badge">
+              <span class="city-name"
+                ><svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"
+                  ></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                Sukkur</span
+              >
+              <span class="city-coords">27.7064°N, 68.8456°E</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- HOW IT WORKS -->
+        <h2>How It Works</h2>
+        <div
+          class="about-grid"
+          style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr))"
+        >
+          <div class="about-card step-card">
+            <div class="step-number">1</div>
+            <h3>Sign Up</h3>
+            <p>
+              Create your account and provide basic information about your
+              organization, including location and energy category.
+            </p>
+          </div>
+          <div class="about-card step-card">
+            <div class="step-number">2</div>
+            <h3>Input Data</h3>
+            <p>
+              Enter your historical energy consumption data (weekly, monthly,
+              yearly) to build an accurate baseline.
+            </p>
+          </div>
+          <div class="about-card step-card">
+            <div class="step-number">3</div>
+            <h3>Get Predictions</h3>
+            <p>
+              Our AI analyzes your data combined with real-time weather to
+              generate precise energy forecasts.
+            </p>
+          </div>
+          <div class="about-card step-card">
+            <div class="step-number">4</div>
+            <h3>Optimize</h3>
+            <p>
+              Review detailed statistics and identify optimization opportunities
+              to reduce energy costs and footprint.
+            </p>
+          </div>
+        </div>
+
+        <!-- SUPPORTED CATEGORIES -->
+        <h2>Supported Categories</h2>
+        <div
+          class="about-grid"
+          style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr))"
+        >
+          <div class="about-card">
+            <div class="card-icon">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+              </svg>
+            </div>
+            <h3>Residential</h3>
+            <p>Household energy management for homes and apartments.</p>
+          </div>
+          <div class="about-card">
+            <div class="card-icon">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+                <path d="M9 22v-4h6v4"></path>
+                <path d="M8 6h.01"></path>
+                <path d="M16 6h.01"></path>
+                <path d="M12 6h.01"></path>
+                <path d="M12 10h.01"></path>
+                <path d="M12 14h.01"></path>
+                <path d="M16 10h.01"></path>
+                <path d="M16 14h.01"></path>
+                <path d="M8 10h.01"></path>
+                <path d="M8 14h.01"></path>
+              </svg>
+            </div>
+            <h3>Commercial</h3>
+            <p>Office buildings, retail centers, and service facilities.</p>
+          </div>
+          <div class="about-card">
+            <div class="card-icon">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+                <circle cx="12" cy="14" r="4"></circle>
+                <line x1="12" y1="6" x2="12.01" y2="6"></line>
+              </svg>
+            </div>
+            <h3>Industrial</h3>
+            <p>Manufacturing plants and heavy industrial operations.</p>
+          </div>
+          <div class="about-card">
+            <div class="card-icon">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M12 2v20"></path>
+                <path
+                  d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
+                ></path>
+              </svg>
+            </div>
+            <h3>Financial</h3>
+            <p>Banks, data centers, and critical financial infrastructure.</p>
+          </div>
+        </div>
+
+        <!-- BENEFITS -->
+        <div class="benefits-wrapper">
+          <h2 style="margin-top: 0">System Benefits</h2>
+          <div class="benefits-grid">
+            <div class="benefit-item">
+              <h3>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                Cost Reduction
+              </h3>
+              <p>
+                Identify peak consumption periods and optimize operations to
+                reduce energy bills by up to 20%.
+              </p>
+            </div>
+            <div class="benefit-item">
+              <h3>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                Sustainability
+              </h3>
+              <p>
+                Monitor and reduce your carbon footprint with intelligent and
+                predictive energy management.
+              </p>
+            </div>
+            <div class="benefit-item">
+              <h3>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                Planning
+              </h3>
+              <p>
+                Make data-backed, informed decisions about infrastructure
+                expansion and maintenance scheduling.
+              </p>
+            </div>
+            <div class="benefit-item">
+              <h3>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                Reliability
+              </h3>
+              <p>
+                Ensure adequate power supply and avoid demand peaks through
+                predictive forecasting models.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- CONTACT -->
+        <h2>Contact & Support</h2>
+        <div
+          class="about-card"
+          style="padding: 0; display: flex; flex-wrap: wrap"
+        >
+          <div style="flex: 1; min-width: 300px; padding: 40px">
+            <p style="font-size: 1.1em">
+              For any queries, technical support, or partnership requests,
+              please contact our dedicated team. We are here to help you
+              optimize your energy consumption.
+            </p>
+          </div>
+          <div style="flex: 1; min-width: 300px" class="contact-info">
+            <div class="contact-row">
+              <strong>Email:</strong>
+              <span
+                ><a href="mailto:f22ndocs1m01010@iub.edu.pk"
+                  >Contact Us</a
+                ></span
+              >
+            </div>
+            <div class="contact-row">
+              <strong>Phone:</strong>
+              <span>+92-333-444-0000</span>
+            </div>
+            <div class="contact-row">
+              <strong>Address:</strong>
+              <span>Bahawalnagar, Pakistan</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {% include "footer.html" %}
+
+    <script src="/static/js/theme.js"></script>
+    <script src="/static/js/sidebar.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/main.js"></script>
+  </body>
+</html>

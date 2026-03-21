@@ -1,0 +1,858 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Panel · FLUX</title>
+    <link rel="stylesheet" href="/static/css/admin.css" />
+    {% include "auth_bridge.html" %}
+  </head>
+
+  <body class="admin-page">
+    <!-- Mobile sidebar (nav carries over from style.css) -->
+    <aside class="sidebar">
+      <ul class="sidebar-menu">
+        <li><a href="/">Home</a></li>
+        <li><a href="/prediction">Prediction</a></li>
+        <li><a href="/statistics">Statistics</a></li>
+        <li><a href="/about">About</a></li>
+        <li
+          style="
+            margin-top: 40px;
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+          "
+        >
+          <a href="#" id="logoutBtn">Logout</a>
+        </li>
+      </ul>
+    </aside>
+    <div class="sidebar-overlay"></div>
+
+    <!-- ─── HEADER ─── -->
+    <header>
+      <div class="container header-flex">
+        <button class="menu-toggle" aria-label="Open Menu">&#9776;</button>
+
+        <div class="logo">
+          <img src="/static/images/logo.png" alt="FLUX Logo" />
+          <span>FLUX</span>
+        </div>
+
+        <nav>
+          <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/prediction">Prediction</a></li>
+            <li><a href="/statistics">Statistics</a></li>
+            <li><a href="/about">About</a></li>
+          </ul>
+        </nav>
+
+        <div class="auth-buttons">
+          <!-- Profile trigger -->
+          <div class="user-profile-trigger" id="userEmail" title="View Profile">
+            <span id="userFirstName">--</span>
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 12 12"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M1 1L6 6L11 1" />
+            </svg>
+          </div>
+
+          <a href="#" id="logoutBtnHeader" style="display: none">Logout</a>
+
+          <button
+            id="themeToggle"
+            title="Toggle Theme"
+            class="theme-toggle-btn"
+          >
+            <svg
+              class="sun-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="5" />
+              <line x1="12" y1="1" x2="12" y2="3" />
+              <line x1="12" y1="21" x2="12" y2="23" />
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+              <line x1="1" y1="12" x2="3" y2="12" />
+              <line x1="21" y1="12" x2="23" y2="12" />
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+            </svg>
+            <svg
+              class="moon-icon"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              style="display: none"
+            >
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Profile Popup -->
+        <div id="profilePopup" class="profile-popup" style="display: none">
+          <div class="profile-popup-content">
+            <div class="profile-header">
+              <h3 id="profileName">User Name</h3>
+              <button class="close-popup">&times;</button>
+            </div>
+            <div class="profile-body">
+              <p><strong>Email:</strong> <span id="profileEmail">—</span></p>
+              <p>
+                <strong>Organization:</strong> <span id="profileOrg">—</span>
+              </p>
+              <p><strong>City:</strong> <span id="profileCity">—</span></p>
+              <p>
+                <strong>Role:</strong>
+                <span
+                  id="profileRole"
+                  style="color: var(--electric); font-weight: 700"
+                  >Admin</span
+                >
+              </p>
+            </div>
+            <div class="profile-footer">
+              <button id="profileLogoutBtn" class="btn-danger full-width">
+                Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ─── BODY LAYOUT ─── -->
+    <div class="admin-container">
+      <!-- Admin Sidebar -->
+      <aside class="admin-sidebar">
+        <div class="admin-sidebar-header">
+          <h3>Admin Panel</h3>
+          <p>Management Console</p>
+        </div>
+        <ul class="admin-menu">
+          <li>
+            <a
+              href="#dashboard"
+              class="admin-tab active"
+              data-target="dashboardSection"
+              >Dashboard</a
+            >
+          </li>
+          <li>
+            <a href="#users" class="admin-tab" data-target="usersSection"
+              >Users</a
+            >
+          </li>
+          <li>
+            <a
+              href="#predictions"
+              class="admin-tab"
+              data-target="predictionsSection"
+              >Predictions</a
+            >
+          </li>
+          <li>
+            <a href="#settings" class="admin-tab" data-target="settingsSection"
+              >Settings</a
+            >
+          </li>
+        </ul>
+      </aside>
+
+      <!-- Admin Main -->
+      <main class="admin-main">
+        <div class="admin-content">
+          <!-- ═══════════════════ DASHBOARD ═══════════════════ -->
+          <section id="dashboardSection">
+            <!-- Section header -->
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 28px;
+                flex-wrap: wrap;
+                gap: 12px;
+              "
+            >
+              <div>
+                <h2
+                  style="
+                    font-size: 1.5em;
+                    font-weight: 800;
+                    letter-spacing: -0.02em;
+                    margin: 0;
+                  "
+                >
+                  Overview
+                </h2>
+                <p
+                  style="
+                    color: var(--text-muted);
+                    font-size: 0.85em;
+                    margin: 4px 0 0;
+                  "
+                >
+                  Real-time platform metrics
+                </p>
+              </div>
+
+              <!-- Global Intel Trigger -->
+              <button class="btn-glass" id="openIntelBtn" onclick="openGlobalIntelligence()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v22M2 12h22M12 2a10 10 0 1 0 10 10 10 10 0 0 0-10-10z"/></svg>
+                Global Intelligence
+              </button>
+
+              <!-- System health pill -->
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 8px;
+                  background: rgba(34, 197, 94, 0.08);
+                  border: 1px solid rgba(34, 197, 94, 0.2);
+                  padding: 7px 14px;
+                  border-radius: 20px;
+                "
+              >
+                <span
+                  style="
+                    width: 7px;
+                    height: 7px;
+                    background: var(--success);
+                    border-radius: 50%;
+                    animation: pulse 2s infinite;
+                    display: inline-block;
+                  "
+                ></span>
+                <span
+                  style="
+                    color: var(--success);
+                    font-size: 0.78em;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                  "
+                  >System: Operational</span
+                >
+              </div>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="dashboard-grid">
+              <div class="stat-card">
+                <div class="stat-label">Active Users</div>
+                <div class="stat-value" id="activeUsersVal">0</div>
+                <div class="stat-change" style="color: var(--electric)">
+                  Live monitoring
+                </div>
+              </div>
+              <div class="stat-card accent-pink">
+                <div class="stat-label">Total Predictions</div>
+                <div class="stat-value" id="totalPredictions">0</div>
+                <div class="stat-change" id="predictionsChange">Lifetime</div>
+              </div>
+              <div class="stat-card accent-green">
+                <div class="stat-label">Today's Predictions</div>
+                <div class="stat-value" id="predictionsToday">0</div>
+                <div class="stat-change" id="storageStatus">
+                  Generated today
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Registered Users</div>
+                <div class="stat-value" id="totalUsers">0</div>
+                <div class="stat-change">Total accounts</div>
+              </div>
+            </div>
+
+            <!-- ─── System Analytics ─── -->
+            <div class="data-table-container" style="margin-bottom: 24px">
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-bottom: 20px;
+                  flex-wrap: wrap;
+                  gap: 12px;
+                "
+              >
+                <div>
+                  <h3>System Analytics</h3>
+                  <p
+                    style="
+                      color: var(--text-muted);
+                      font-size: 0.8em;
+                      margin-top: 3px;
+                    "
+                  >
+                    Prediction data visualised in real-time
+                  </p>
+                </div>
+                <!-- Chart switcher -->
+                <div class="chart-switcher" id="chartSwitcher">
+                  <button
+                    class="btn-outline admin-chart-tab active"
+                    data-chart="peakUsage"
+                  >
+                    Hourly Usage
+                  </button>
+                  <button
+                    class="btn-outline admin-chart-tab"
+                    data-chart="categoryBreakdown"
+                  >
+                    Categories
+                  </button>
+                  <button
+                    class="btn-outline admin-chart-tab"
+                    data-chart="hourly"
+                  >
+                    Hourly Forecast
+                  </button>
+                  <button
+                    class="btn-outline admin-chart-tab"
+                    data-chart="trendLine"
+                  >
+                    Load Trend
+                  </button>
+                  <button
+                    class="btn-outline admin-chart-tab"
+                    data-chart="rfLive"
+                  >
+                    <span class="rf-status-dot"></span>
+                    RF Live
+                  </button>
+                </div>
+              </div>
+
+              <!-- Chart canvases -->
+              <div class="admin-charts-container" id="adminChartsContainer">
+                <canvas id="peakUsageChart"></canvas>
+                <canvas id="categoryDonutChart" style="display: none"></canvas>
+                <canvas id="trendLineChart" style="display: none"></canvas>
+                <canvas id="hourlyForecastChart" style="display: none"></canvas>
+                <div
+                  id="rfLiveContainer"
+                  style="display: none; position: absolute; inset: 0"
+                >
+                  <canvas
+                    id="rfLiveChart"
+                    style="
+                      width: 100% !important;
+                      height: 100% !important;
+                      position: static !important;
+                    "
+                  ></canvas>
+                  <div class="rf-status-card">
+                    <div
+                      style="
+                        color: var(--text-muted);
+                        font-size: 0.78em;
+                        margin-bottom: 4px;
+                        text-transform: uppercase;
+                        letter-spacing: 0.05em;
+                      "
+                    >
+                      Model Status
+                    </div>
+                    <div
+                      style="
+                        color: var(--success);
+                        font-weight: 700;
+                        font-size: 0.85em;
+                        margin-bottom: 6px;
+                      "
+                    >
+                      <span class="rf-status-dot"></span>Processing Live
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        gap: 16px;
+                        color: var(--text-muted);
+                        font-size: 0.8em;
+                      "
+                    >
+                      <span
+                        >Trees:
+                        <strong style="color: var(--electric)"
+                          >300</strong
+                        ></span
+                      >
+                      <span
+                        >Depth:
+                        <strong style="color: var(--electric)">8</strong></span
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Summary stats row -->
+              <div class="analytics-summary">
+                <div class="analytics-summary-item" title="Mean predicted consumption per 24-hour period">
+                  <span class="analytics-summary-label">Average Daily Consumption</span>
+                  <span class="analytics-summary-value" id="avgDaily">—</span>
+                </div>
+                <div class="analytics-summary-item" title="Highest anticipated load intensity in the current cycle">
+                  <span class="analytics-summary-label">System Peak Intensity</span>
+                  <span class="analytics-summary-value" id="peakUsage">—</span>
+                </div>
+                <div class="analytics-summary-item" title="Aggregate weighted growth trend across all active profiles">
+                  <span class="analytics-summary-label">Cumulative Load Variance</span>
+                  <span class="analytics-summary-value" id="accuracy">—</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- ─── Recent Activity ─── -->
+            <div class="data-table-container">
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-bottom: 20px;
+                "
+              >
+                <div>
+                  <h3 style="display: flex; align-items: center; gap: 8px">
+                    Live Activity Stream
+                  </h3>
+                  <p style="color: var(--text-muted); font-size: 0.8em; margin-top: 2px">
+                    Real-time transaction and system audit log
+                  </p>
+                </div>
+                <button
+                  class="btn-outline"
+                  style="font-size: 0.78em; padding: 6px 12px"
+                  onclick="loadData()"
+                >
+                  Force Refresh
+                </button>
+              </div>
+              
+              <!-- Modern div-based activity stream -->
+              <div id="activityLog" class="activity-stream">
+                <div style="text-align: center; color: var(--text-muted); padding: 40px">
+                  Connecting to data stream...
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ═══════════════════ USERS ═══════════════════ -->
+          <section id="usersSection" style="display: none">
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 24px;
+              "
+            >
+              <div>
+                <h2
+                  style="
+                    font-size: 1.5em;
+                    font-weight: 800;
+                    letter-spacing: -0.02em;
+                    margin: 0;
+                  "
+                >
+                  Users
+                </h2>
+                <p
+                  style="
+                    color: var(--text-muted);
+                    font-size: 0.85em;
+                    margin: 4px 0 0;
+                  "
+                >
+                  Manage platform accounts
+                </p>
+              </div>
+            </div>
+            <div class="data-table-container">
+              <div style="overflow-x: auto">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Organization</th>
+                      <th>City</th>
+                      <th>Category</th>
+                      <th>Joined</th>
+                      <th>Role</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="usersTable">
+                    <tr>
+                      <td
+                        colspan="8"
+                        style="
+                          text-align: center;
+                          color: var(--text-muted);
+                          padding: 32px;
+                        "
+                      >
+                        Loading...
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!-- ═══════════════════ PREDICTIONS ═══════════════════ -->
+          <section id="predictionsSection" style="display: none">
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 24px;
+              "
+            >
+              <div>
+                <h2
+                  style="
+                    font-size: 1.5em;
+                    font-weight: 800;
+                    letter-spacing: -0.02em;
+                    margin: 0;
+                  "
+                >
+                  Prediction Records
+                </h2>
+                <p
+                  style="
+                    color: var(--text-muted);
+                    font-size: 0.85em;
+                    margin: 4px 0 0;
+                  "
+                >
+                  All generated forecasts
+                </p>
+              </div>
+              <button class="btn-danger" style="padding: 8px 16px; font-size: 0.85em;" onclick="deleteAllPredictions()">
+                Delete All Predictions
+              </button>
+            </div>
+            <div class="data-table-container">
+              <div style="overflow-x: auto">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>User</th>
+                      <th>Company</th>
+                      <th>City</th>
+                      <th>Week (kWh)</th>
+                      <th>Month (kWh)</th>
+                      <th>Year (kWh)</th>
+                      <th>Growth</th>
+                      <th>Date</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="predictionsTable">
+                    <tr>
+                      <td
+                        colspan="9"
+                        style="
+                          text-align: center;
+                          color: var(--text-muted);
+                          padding: 32px;
+                        "
+                      >
+                        Loading...
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!-- ═══════════════════ SETTINGS ═══════════════════ -->
+          <section id="settingsSection" style="display: none">
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 24px;
+              "
+            >
+              <div>
+                <h2
+                  style="
+                    font-size: 1.5em;
+                    font-weight: 800;
+                    letter-spacing: -0.02em;
+                    margin: 0;
+                  "
+                >
+                  Settings
+                </h2>
+                <p
+                  style="
+                    color: var(--text-muted);
+                    font-size: 0.85em;
+                    margin: 4px 0 0;
+                  "
+                >
+                  Configure system preferences
+                </p>
+              </div>
+            </div>
+
+            <div
+              style="
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+                gap: 20px;
+              "
+            >
+              <!-- System Preferences -->
+              <div class="data-table-container">
+                <h3 style="margin-bottom: 20px">System Preferences</h3>
+                <div style="display: flex; flex-direction: column; gap: 18px">
+                  <label
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      align-items: center;
+                      cursor: pointer;
+                    "
+                  >
+                    <div>
+                      <div style="font-weight: 600; font-size: 0.9em">
+                        System Notifications
+                      </div>
+                      <div
+                        style="
+                          color: var(--text-muted);
+                          font-size: 0.8em;
+                          margin-top: 2px;
+                        "
+                      >
+                        Alert admins for critical events
+                      </div>
+                    </div>
+                    <input
+                      type="checkbox"
+                      id="notificationToggle"
+                      checked
+                      style="width: auto"
+                    />
+                  </label>
+                  <div style="border-top: 1px solid var(--border)"></div>
+                  <label
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      align-items: center;
+                      cursor: pointer;
+                    "
+                  >
+                    <div>
+                      <div style="font-weight: 600; font-size: 0.9em">
+                        Email Reports
+                      </div>
+                      <div
+                        style="
+                          color: var(--text-muted);
+                          font-size: 0.8em;
+                          margin-top: 2px;
+                        "
+                      >
+                        Weekly summary to admin
+                      </div>
+                    </div>
+                    <input
+                      type="checkbox"
+                      id="emailNotifications"
+                      checked
+                      style="width: auto"
+                    />
+                  </label>
+                  <div style="border-top: 1px solid var(--border)"></div>
+                  <label
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      align-items: center;
+                      cursor: pointer;
+                    "
+                  >
+                    <div>
+                      <div style="font-weight: 600; font-size: 0.9em">
+                        Maintenance Mode
+                      </div>
+                      <div
+                        style="
+                          color: var(--text-muted);
+                          font-size: 0.8em;
+                          margin-top: 2px;
+                        "
+                      >
+                        Disable user access for upgrades
+                      </div>
+                    </div>
+                    <input
+                      type="checkbox"
+                      id="maintenanceMode"
+                      style="width: auto"
+                    />
+                  </label>
+                </div>
+              </div>
+
+              <!-- Data Management -->
+              <div class="data-table-container">
+                <h3 style="margin-bottom: 20px">Data Management</h3>
+                <p
+                  style="
+                    color: var(--text-muted);
+                    font-size: 0.85em;
+                    margin-bottom: 18px;
+                  "
+                >
+                  Export a full backup of all system data.
+                </p>
+                <button class="btn-primary" onclick="exportBackup()">
+                  Export Backup (JSON)
+                </button>
+                <p
+                  style="
+                    color: var(--text-muted);
+                    font-size: 0.8em;
+                    margin-top: 12px;
+                  "
+                >
+                  Last backup: <span id="lastBackup">Never</span>
+                </p>
+              </div>
+
+              <!-- Admin Account Info -->
+              <div class="data-table-container">
+                <h3 style="margin-bottom: 20px">Admin Account</h3>
+                <form id="adminProfileForm" style="display: flex; flex-direction: column; gap: 14px; font-size: 0.9em;">
+                  <div>
+                    <label style="color:var(--text-muted); display:block; margin-bottom:4px; font-weight:600">Name</label>
+                    <input type="text" id="adminNameInput" class="form-control" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text)" />
+                  </div>
+                  <div>
+                    <label style="color:var(--text-muted); display:block; margin-bottom:4px; font-weight:600">Organization</label>
+                    <input type="text" id="adminOrgInput" class="form-control" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text)" />
+                  </div>
+                  <div style="display: flex; justify-content: space-between; margin-top: 6px; padding-bottom: 8px; border-bottom: 1px solid var(--border)">
+                    <span style="color: var(--text-muted)">Member Since</span>
+                    <span id="adminJoined" style="font-weight: 600">—</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; align-items: center">
+                    <span style="color: var(--text-muted)">Active Session Stay</span>
+                    <span id="adminSessionTime" style="font-weight: 700; color: var(--electric); font-variant-numeric: tabular-nums; background: rgba(0, 212, 255, 0.1); padding: 4px 10px; border-radius: 12px;">00:00:00</span>
+                  </div>
+                  <button type="button" class="btn-secondary" style="margin-top: 14px" onclick="openGlobalIntelligence()">Global Intelligence</button>
+                  <button type="button" class="btn-primary" style="margin-top: 14px" onclick="updateAdminProfile()">Save Changes</button>
+                </form>
+              </div>
+            </div>
+          </section>
+        </div>
+        <!-- /.admin-content -->
+      </main>
+    </div>
+    <!-- /.admin-container -->
+
+    <!-- ── GLOBAL INTELLIGENCE MODAL ── -->
+    <div id="intelModal" class="intel-modal">
+      <div class="intel-glass">
+        <div class="intel-header">
+          <div class="intel-header-info">
+            <h2>Global Intelligence</h2>
+            <p>Advanced cross-platform data synchronization and predictive analytics</p>
+          </div>
+          <button class="intel-close" onclick="closeIntelModal()">&times;</button>
+        </div>
+        <div class="intel-body">
+          <div class="intel-nav">
+            <div class="intel-nav-item active" onclick="switchIntelTab('cumulative', this)">
+              <h4>Cumulative Load</h4>
+              <p>Aggregate historical intensity</p>
+            </div>
+            <div class="intel-nav-item" onclick="switchIntelTab('categories', this)">
+              <h4>Category Matrix</h4>
+              <p>Distribution across 4 segments</p>
+            </div>
+            <div class="intel-nav-item" onclick="switchIntelTab('accuracy', this)">
+              <h4>Model Variance</h4>
+              <p>Prediction vs Actual delta</p>
+            </div>
+            <div class="intel-nav-item" onclick="switchIntelTab('activity', this)">
+              <h4>Usage Pulse</h4>
+              <p>Real-time node interaction</p>
+            </div>
+          </div>
+          <div class="intel-content">
+            <div class="intel-chart-wrap">
+              <canvas id="intelMainChart"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="intel-footer">
+          <button class="btn-secondary" onclick="closeIntelModal()">Close Perspective</button>
+          <button class="btn-primary" onclick="exportBackup()">Run Sync Export</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── DETAIL MODAL ─── -->
+    <div class="modal" id="detailModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="modalTitle">Details</h3>
+          <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="closeModal()">Close</button>
+          <button
+            class="btn-danger"
+            id="deleteBtn"
+            style="display: none"
+            onclick="deleteUser()"
+          >
+            Delete User
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="/static/js/theme.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/sidebar.js"></script>
+    <script src="/static/js/admin.js"></script>
+  </body>
+</html>

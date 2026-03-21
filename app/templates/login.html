@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - FLUX</title>
+    <link rel="stylesheet" href="/static/css/credential.css" />
+      {% include "auth_bridge.html" %}
+</head>
+  <body>
+    <!-- FLASH MESSAGES -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-messages" style="position:fixed;top:80px;right:20px;z-index:9999;max-width:350px;">
+        {% for category, message in messages %}
+        <div class="flash-{{ category }}" style="padding:12px 20px;margin-bottom:10px;border-radius:8px;font-size:0.9em;font-weight:600;{% if category == 'error' %}background:#ff4757;color:#fff;{% elif category == 'success' %}background:#2ed573;color:#111;{% else %}background:#1a1f3a;color:#e0e0e0;border:1px solid var(--border);{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- BACKGROUND FLOATING LOGOS -->
+    <div class="background-logo">
+      <svg width="50" height="50" viewBox="0 0 100 100">
+        <circle
+          cx="50"
+          cy="50"
+          r="45"
+          fill="none"
+          stroke="#00d4ff"
+          stroke-width="3"
+        />
+        <path d="M50 20 L70 80 L30 80 Z" fill="#00d4ff" opacity="0.8" />
+        <circle cx="50" cy="50" r="8" fill="#ff006e" />
+      </svg>
+    </div>
+    <div class="background-logo">
+      <svg width="50" height="50" viewBox="0 0 100 100">
+        <circle
+          cx="50"
+          cy="50"
+          r="45"
+          fill="none"
+          stroke="#00d4ff"
+          stroke-width="3"
+        />
+        <path d="M50 20 L70 80 L30 80 Z" fill="#00d4ff" opacity="0.8" />
+        <circle cx="50" cy="50" r="8" fill="#ff006e" />
+      </svg>
+    </div>
+    <div class="background-logo">
+      <svg width="50" height="50" viewBox="0 0 100 100">
+        <circle
+          cx="50"
+          cy="50"
+          r="45"
+          fill="none"
+          stroke="#00d4ff"
+          stroke-width="3"
+        />
+        <path d="M50 20 L70 80 L30 80 Z" fill="#00d4ff" opacity="0.8" />
+        <circle cx="50" cy="50" r="8" fill="#ff006e" />
+      </svg>
+    </div>
+    <div class="background-logo">
+      <svg width="50" height="50" viewBox="0 0 100 100">
+        <circle
+          cx="50"
+          cy="50"
+          r="45"
+          fill="none"
+          stroke="#00d4ff"
+          stroke-width="3"
+        />
+        <path d="M50 20 L70 80 L30 80 Z" fill="#00d4ff" opacity="0.8" />
+        <circle cx="50" cy="50" r="8" fill="#ff006e" />
+      </svg>
+    </div>
+    <div class="background-logo">
+      <svg width="50" height="50" viewBox="0 0 100 100">
+        <circle
+          cx="50"
+          cy="50"
+          r="45"
+          fill="none"
+          stroke="#00d4ff"
+          stroke-width="3"
+        />
+        <path d="M50 20 L70 80 L30 80 Z" fill="#00d4ff" opacity="0.8" />
+        <circle cx="50" cy="50" r="8" fill="#ff006e" />
+      </svg>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+      <div class="auth-container">
+        <!-- FORM SECTION -->
+        <div class="auth-form">
+          <div class="form-card">
+            <h2>Welcome Back</h2>
+            <p>Access your FLUX analytics dashboard</p>
+
+            <div id="alertContainer"></div>
+
+            <form id="loginForm" action="/auth/login" method="POST">
+              <div class="form-group">
+                <label for="email">Email Address</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  placeholder="you@example.com"
+                  required
+                  autocomplete="email"
+                />
+                <span class="error" id="emailError"></span>
+              </div>
+
+              <div class="form-group">
+                <label for="password">Password</label>
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  placeholder="••••••••"
+                  required
+                  autocomplete="current-password"
+                />
+                <span class="error" id="passwordError"></span>
+              </div>
+
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="rememberMe" name="rememberMe" />
+                  Remember me
+                </label>
+              </div>
+
+              <button type="submit" class="form-submit">Login</button>
+            </form>
+
+            <div class="form-footer">
+              <p>
+                Don't have an account?
+                <a href="/auth/signup" class="redirect-link">Sign up here</a>
+              </p>
+              <p><a href="#" class="redirect-link">Forgot password?</a></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- IMAGE SECTION (Decorative) -->
+        <div class="auth-image">
+          <h3
+            style="
+              color: var(--electric);
+              margin-bottom: -10px;
+              font-size: 24px;
+            "
+          >
+            Predict Your Energy Needs
+          </h3>
+          <svg
+            width="400"
+            height="400"
+            viewBox="0 0 300 300"
+            style="max-width: 100%"
+            class="login-animated-svg"
+          >
+            <style>
+              @keyframes expandCircle {
+                0%,
+                100% {
+                  r: 120px;
+                  opacity: 0.3;
+                }
+                50% {
+                  r: 130px;
+                  opacity: 0.15;
+                }
+              }
+              @keyframes pulseInnerCircle {
+                0%,
+                100% {
+                  r: 90px;
+                  opacity: 0.4;
+                }
+                50% {
+                  r: 80px;
+                  opacity: 0.2;
+                }
+              }
+              @keyframes waveLines {
+                0%,
+                100% {
+                  stroke-width: 2px;
+                  opacity: 0.5;
+                }
+                50% {
+                  stroke-width: 3px;
+                  opacity: 0.8;
+                }
+              }
+              @keyframes glowPulse {
+                0%,
+                100% {
+                  filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.3));
+                }
+                50% {
+                  filter: drop-shadow(0 0 30px rgba(0, 212, 255, 0.8));
+                }
+              }
+
+              .login-svg-container {
+                animation: glowPulse 2.5s ease-in-out infinite;
+              }
+
+              .expand-outer {
+                animation: expandCircle 4s ease-in-out infinite;
+              }
+
+              .pulse-inner {
+                animation: pulseInnerCircle 3.5s ease-in-out infinite;
+              }
+
+              .wave-line {
+                animation: waveLines 2s ease-in-out infinite;
+              }
+            </style>
+            <g class="login-svg-container">
+              <!-- Outer expanding circle -->
+              <circle
+                class="expand-outer"
+                cx="150"
+                cy="150"
+                r="120"
+                fill="rgba(0, 212, 255, 0.1)"
+                stroke="#00d4ff"
+                stroke-width="2"
+              />
+              <!-- Inner pulsing circle -->
+              <circle
+                class="pulse-inner"
+                cx="150"
+                cy="150"
+                r="90"
+                fill="rgba(255, 0, 110, 0.05)"
+                stroke="#ff006e"
+                stroke-width="2"
+              />
+              <!-- Waving lines -->
+              <line
+                class="wave-line"
+                x1="150"
+                y1="50"
+                x2="150"
+                y2="250"
+                stroke="#00d4ff"
+                stroke-width="2"
+                opacity="0.5"
+              />
+              <line
+                class="wave-line"
+                x1="50"
+                y1="150"
+                x2="250"
+                y2="150"
+                stroke="#ff006e"
+                stroke-width="2"
+                opacity="0.5"
+                style="animation-delay: 0.3s"
+              />
+            </g>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <script src="/static/js/theme.js"></script>
+    <script src="/static/js/auth.js"></script>
+  </body>
+</html>

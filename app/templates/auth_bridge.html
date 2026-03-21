@@ -1,0 +1,13 @@
+{% if current_user %}
+<script>
+  // Overwrite the original localStorage behavior with real backend session
+  window.currentUser = {{ current_user | tojson | safe }};
+  // Ensure frontend functions see this as logged in
+  localStorage.setItem("currentUser", JSON.stringify(window.currentUser));
+</script>
+{% else %}
+<script>
+  window.currentUser = null;
+  localStorage.removeItem("currentUser");
+</script>
+{% endif %}

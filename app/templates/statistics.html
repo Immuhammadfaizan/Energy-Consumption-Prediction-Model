@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Statistics · FLUX</title>
+    <link rel="stylesheet" href="/static/css/headfoot.css" />
+    <link rel="stylesheet" href="/static/css/statistics.css" />
+    {% include "auth_bridge.html" %}
+
+  </head>
+
+  <body>
+    {% include "header.html" %}
+
+    <!-- HERO SECTION -->
+    <section class="hero hero-statistics">
+      <div class="container">
+        <h1>Energy Statistics &amp; Analysis</h1>
+        <p>
+          Review your organization's energy consumption patterns and forecasts
+        </p>
+      </div>
+    </section>
+
+    <!-- MAIN CONTENT -->
+    <section class="section">
+      <div class="container">
+        <!-- ══ MODERN SUMMARY CARDS ══ -->
+        <h2>Summary</h2>
+        <div id="modernSummary">
+          <!-- Populated by statistics.js -->
+          <div class="stat-card stat-card-blue">
+            <div class="stat-icon">🔢</div>
+            <div class="stat-info">
+              <p class="stat-label">Total Predictions</p>
+              <p class="stat-value" id="totalPredictions">—</p>
+              <p class="stat-sub">Loading…</p>
+            </div>
+          </div>
+          <div class="stat-card stat-card-teal">
+            <div class="stat-icon">📅</div>
+            <div class="stat-info">
+              <p class="stat-label">Avg Weekly Usage</p>
+              <p class="stat-value" id="avgWeekly">— kWh</p>
+              <p class="stat-sub">Historical baseline</p>
+            </div>
+          </div>
+          <div class="stat-card stat-card-green">
+            <div class="stat-icon">📆</div>
+            <div class="stat-info">
+              <p class="stat-label">Avg Monthly Usage</p>
+              <p class="stat-value" id="avgMonthly">— kWh</p>
+              <p class="stat-sub">Historical baseline</p>
+            </div>
+          </div>
+          <div class="stat-card stat-card-purple">
+            <div class="stat-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+            </div>
+            <div class="stat-info">
+              <p class="stat-label">Avg Yearly Usage</p>
+              <p class="stat-value" id="avgYearly">— kWh</p>
+              <p class="stat-sub">Historical baseline</p>
+            </div>
+          </div>
+          <div class="stat-card stat-card-live">
+            <div class="live-badge">🔴 LIVE</div>
+            <div class="stat-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            </div>
+            <div class="stat-info">
+              <p class="stat-label">Current Predicted Load</p>
+              <p class="stat-value" id="liveWeekVal" style="color: #00d4ff">
+                — kWh
+              </p>
+              <p class="stat-sub">Make a prediction first</p>
+            </div>
+            <div class="live-pulse"></div>
+          </div>
+          <div class="stat-card stat-card-efficiency">
+            <div class="stat-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+            </div>
+            <div class="stat-info">
+              <p class="stat-label">Energy Efficiency Score</p>
+              <p class="stat-value">—</p>
+              <p class="stat-sub">Loading…</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ CHARTS ══ -->
+        <h2>Visual Analysis</h2>
+        <div class="chart-split">
+          <!-- Trend Bar Chart -->
+          <div class="chart-panel">
+            <h3>Consumption Trend (Last 10 Predictions)</h3>
+            <canvas id="trendChart"></canvas>
+          </div>
+
+          <!-- Donut — Category Distribution -->
+          <div class="chart-panel">
+            <h3>Category Distribution</h3>
+            <canvas id="donutChart"></canvas>
+          </div>
+        </div>
+
+        <!-- ══ PREDICTIONS TABLE ══ -->
+        <h2 style="margin-top: 20px">Your Statistics</h2>
+        <div class="card" style="overflow: hidden; padding: 0">
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Organization</th>
+                  <th>Category</th>
+                  <th>City</th>
+                  <th>Weekly Usage (kWh)</th>
+                  <th>Monthly Usage (kWh)</th>
+                  <th>Yearly Usage (kWh)</th>
+                  <th>Next Week Forecast</th>
+                  <th>Next Month Forecast</th>
+                  <th>Next Year Forecast</th>
+                  <th>Growth %</th>
+                   <th>Date</th>
+                   <th>Actions</th>
+                 </tr>
+               </thead>
+              <tbody id="statsTable"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- EMPTY STATE -->
+        <div id="emptyState" class="card" style="display: none">
+          <div class="empty-state">
+            <h3>No Predictions Yet</h3>
+            <p>You haven't made any energy predictions yet.</p>
+            <p>
+              Start by going to the
+              <a
+                href="/prediction"
+                style="color: var(--electric); text-decoration: underline"
+                >Prediction page</a
+              >
+              to generate your first forecast.
+            </p>
+          </div>
+        </div>
+
+        <!-- ══ CATEGORY BREAKDOWN ══ -->
+        <h2 style="margin-top: 60px">Breakdown by Category</h2>
+        <div
+          style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+          "
+          id="categoryBreakdown"
+        ></div>
+      </div>
+    </section>
+
+    {% include "footer.html" %}
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="/static/js/theme.js"></script>
+    <script src="/static/js/sidebar.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/statistics.js"></script>
+  </body>
+</html>

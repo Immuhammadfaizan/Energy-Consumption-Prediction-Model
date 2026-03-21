@@ -1,0 +1,178 @@
+<!-- header.html  -->
+
+<!-- Mobile Sidebar -->
+<aside class="sidebar">
+  <ul class="sidebar-menu">
+    <li>
+      <a href="/" class="{{ 'active' if request.path == '/' else '' }}">Home</a>
+    </li>
+    <li>
+      <a
+        href="/prediction"
+        class="{{ 'active' if request.path.startswith('/prediction') else '' }}"
+        >Prediction</a
+      >
+    </li>
+    <li>
+      <a
+        href="/statistics"
+        class="{{ 'active' if request.path.startswith('/statistics') else '' }}"
+        >Statistics</a
+      >
+    </li>
+    <li>
+      <a
+        href="/about"
+        class="{{ 'active' if request.path.startswith('/about') else '' }}"
+        >About</a
+      >
+    </li>
+    <li id="adminSidebarItem" style="display: none; margin-top: 8px">
+      <a href="/admin">Admin Panel</a>
+    </li>
+    <li
+      style="
+        margin-top: 40px;
+        border-top: 1px solid var(--border);
+        padding-top: 16px;
+      "
+    >
+      <a href="#" id="logoutBtn">Sign Out</a>
+    </li>
+  </ul>
+</aside>
+<div class="sidebar-overlay"></div>
+
+<!-- Fixed Header -->
+<header class="site-header">
+  <div class="header-inner">
+    <!-- Hamburger (mobile only) -->
+    <button class="menu-toggle" aria-label="Open Menu">&#9776;</button>
+
+    <!-- Logo -->
+    <a href="/" class="site-logo">
+      <img src="/static/images/logo.png" alt="FLUX Logo" />
+      <span>FLUX</span>
+    </a>
+
+    <!-- Primary Nav -->
+    <nav class="site-nav">
+      <ul>
+        <li>
+          <a href="/" class="{{ 'active' if request.path == '/' else '' }}"
+            >Home</a
+          >
+        </li>
+        <li>
+          <a
+            href="/prediction"
+            class="{{ 'active' if request.path.startswith('/prediction') else '' }}"
+            >Prediction</a
+          >
+        </li>
+        <li>
+          <a
+            href="/statistics"
+            class="{{ 'active' if request.path.startswith('/statistics') else '' }}"
+            >Statistics</a
+          >
+        </li>
+        <li>
+          <a
+            href="/about"
+            class="{{ 'active' if request.path.startswith('/about') else '' }}"
+            >About</a
+          >
+        </li>
+        <li id="adminNavItem" style="display: none">
+          <a href="/admin">Admin</a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Actions -->
+    <div class="header-actions">
+      <!-- Profile trigger (shown when logged in) -->
+      <div class="user-profile-trigger" id="userEmail" title="View profile">
+        <span id="userFirstName">—</span>
+        <svg
+          width="10"
+          height="10"
+          viewBox="0 0 12 12"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M1 1L6 6L11 1" />
+        </svg>
+      </div>
+
+      <!-- Login (shown when NOT logged in) -->
+      <a href="/auth/login" id="authBtn" class="header-login-btn">Login</a>
+
+      <!-- Logout (shown when logged in) -->
+      <a href="#" id="logoutBtnHeader">Logout</a>
+
+      <!-- Theme Toggle -->
+      <button id="themeToggle" title="Toggle theme" class="theme-toggle-btn">
+        <svg
+          class="sun-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="5" />
+          <line x1="12" y1="1" x2="12" y2="3" />
+          <line x1="12" y1="21" x2="12" y2="23" />
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+          <line x1="1" y1="12" x2="3" y2="12" />
+          <line x1="21" y1="12" x2="23" y2="12" />
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+        </svg>
+        <svg
+          class="moon-icon"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          style="display: none"
+        >
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Profile Popup -->
+    <div id="profilePopup" class="profile-popup" style="display: none">
+      <div class="profile-popup-content">
+        <div class="profile-header">
+          <h3 id="profileName">User</h3>
+          <button class="close-popup">&times;</button>
+        </div>
+        <div class="profile-body">
+          <p><strong>Email</strong> <span id="profileEmail">—</span></p>
+          <p><strong>Organization</strong> <span id="profileOrg">—</span></p>
+          <p><strong>City</strong> <span id="profileCity">—</span></p>
+          <p>
+            <strong>Role</strong>
+            <span
+              id="profileRole"
+              style="color: var(--electric); font-weight: 700"
+              >User</span
+            >
+          </p>
+        </div>
+        <div class="profile-footer">
+          <button id="profileLogoutBtn" class="btn-popup-logout">
+            Sign Out
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>

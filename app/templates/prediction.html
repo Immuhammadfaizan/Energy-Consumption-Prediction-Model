@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prediction · FLUX</title>
+    <link rel="stylesheet" href="/static/css/headfoot.css" />
+    <link rel="stylesheet" href="/static/css/prediction.css" />
+    {% include "auth_bridge.html" %}
+
+  </head>
+
+  <body>
+    {% include "header.html" %}
+
+    <!-- HERO SECTION -->
+    <section class="hero hero-prediction">
+      <div class="container">
+        <h1>Energy Consumption Prediction</h1>
+        <p>
+          Random Forest model + live Open-Meteo weather for precision
+          forecasting
+        </p>
+      </div>
+    </section>
+
+    <!-- MAIN CONTENT -->
+    <section class="section">
+      <div class="container">
+        <div id="alertContainer"></div>
+
+        <div
+        <div class="container grid-2">
+          <!-- ══ INPUT PANEL ══════════════════════════════════ -->
+          <div>
+            <div class="card">
+              <div id="networkStatus" class="network-status-badge">
+                <span class="status-dot status-online"></span> Checking Connection...
+              </div>
+              <h2 style="font-size: 1.4em; margin-bottom: 24px">
+                Generate Forecast
+              </h2>
+              <form id="predictionForm" class="prediction-form">
+                <div class="form-group">
+                  <label for="companyName">Company / Facility Name</label>
+                  <input
+                    type="text"
+                    id="companyName"
+                    name="company_name"
+                    placeholder="e.g. WAPDA Lahore HQ"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="city">City</label>
+                  <select id="city" name="city" required>
+                    <option value="">Select a City</option>
+                    <option value="abbottabad">Abbottabad</option>
+                    <option value="abdulhakim">Abdul Hakim</option>
+                    <option value="aliabad">Aliabad</option>
+                    <option value="alpurai">Alpurai</option>
+                    <option value="athmuqam">Athmuqam</option>
+                    <option value="attockcity">Attock City</option>
+                    <option value="awaran">Awaran</option>
+                    <option value="badin">Badin</option>
+                    <option value="bagh">Bagh</option>
+                    <option value="bahawalnagar">Bahawalnagar</option>
+                    <option value="bahawalpur">Bahawalpur</option>
+                    <option value="bannu">Bannu</option>
+                    <option value="barkhan">Barkhan</option>
+                    <option value="batgram">Batgram</option>
+                    <option value="bhakkar">Bhakkar</option>
+                    <option value="chakwal">Chakwal</option>
+                    <option value="chaman">Chaman</option>
+                    <option value="charsadda">Charsadda</option>
+                    <option value="chilas">Chilas</option>
+                    <option value="chiniot">Chiniot</option>
+                    <option value="chitral">Chitral</option>
+                    <option value="dadu">Dadu</option>
+                    <option value="daggar">Daggar</option>
+                    <option value="dainyor">Dainyor</option>
+                    <option value="dalbandin">Dalbandin</option>
+                    <option value="dasu">Dasu</option>
+                    <option value="deraallahyar">Dera Allahyar</option>
+                    <option value="derabugti">Dera Bugti</option>
+                    <option value="deraghazikhan">Dera Ghazi Khan</option>
+                    <option value="deraismail">Dera Ismail Khan</option>
+                    <option value="deramurad">Dera Murad Jamali</option>
+                    <option value="eidgah">Eidgah</option>
+                    <option value="faisalabad">Faisalabad</option>
+                    <option value="gakuch">Gakuch</option>
+                    <option value="gandava">Gandava</option>
+                    <option value="ghotki">Ghotki</option>
+                    <option value="gilgit">Gilgit</option>
+                    <option value="gojra">Gojra</option>
+                    <option value="gujranwala">Gujranwala</option>
+                    <option value="gujrat">Gujrat</option>
+                    <option value="gwadar">Gwadar</option>
+                    <option value="hafizabad">Hafizabad</option>
+                    <option value="hangu">Hangu</option>
+                    <option value="haripur">Haripur</option>
+                    <option value="harunabad">Harunabad</option>
+                    <option value="hasilpur">Hasilpur</option>
+                    <option value="hassanabdal">Hassan Abdal</option>
+                    <option value="hujrashahmuqim">Hujra Shah Muqim</option>
+                    <option value="hyderabad">Hyderabad City</option>
+                    <option value="islamabad">Islamabad</option>
+                    <option value="jacobabad">Jacobabad</option>
+                    <option value="jalalpurjattan">Jalapur Jattan</option>
+                    <option value="jamshoro">Jamshoro</option>
+                    <option value="jaranwala">Jaranwala</option>
+                    <option value="jhangcity">Jhang City</option>
+                    <option value="jhelum">Jhelum</option>
+                    <option value="kabirwala">Kabirwala</option>
+                    <option value="kalat">Kalat</option>
+                    <option value="kamalia">Kamalia</option>
+                    <option value="kandhkot">Kandhkot</option>
+                    <option value="karachi">Karachi</option>
+                    <option value="karak">Karak</option>
+                    <option value="kasur">Kasur</option>
+                    <option value="khairpurmirs">Khairpur Mir's</option>
+                    <option value="khanewal">Khanewal</option>
+                    <option value="khanpur">Khanpur</option>
+                    <option value="kharan">Kharan</option>
+                    <option value="kharian">Kharian</option>
+                    <option value="khushab">Khushab</option>
+                    <option value="khuzdar">Khuzdar</option>
+                    <option value="kohat">Kohat</option>
+                    <option value="kohlu">Kohlu</option>
+                    <option value="kotaddu">Kot Addu</option>
+                    <option value="kotli">Kotli</option>
+                    <option value="kulachi">Kulachi</option>
+                    <option value="kundian">Kundian</option>
+                    <option value="lahore">Lahore</option>
+                    <option value="lakki">Lakki</option>
+                    <option value="lalamusa">Lala Musa</option>
+                    <option value="larkana">Larkana</option>
+                    <option value="leiah">Leiah</option>
+                    <option value="lodhran">Lodhran</option>
+                    <option value="loralai">Loralai</option>
+                    <option value="malakand">Malakand</option>
+                    <option value="mandibahauddin">Mandi Bahauddin</option>
+                    <option value="mandiburewala">Mandi Burewala</option>
+                    <option value="mansehra">Mansehra</option>
+                    <option value="mardan">Mardan</option>
+                    <option value="mastung">Mastung</option>
+                    <option value="matiari">Matiari</option>
+                    <option value="mianchannun">Mian Channun</option>
+                    <option value="mianwali">Mianwali</option>
+                    <option value="mingaora">Mingaora</option>
+                    <option value="mirpurkhas">Mirpur Khas</option>
+                    <option value="multan">Multan</option>
+                    <option value="muridke">Muridke</option>
+                    <option value="musakhelb">Musa Khel Bazar</option>
+                    <option value="muzaffarabad">Muzaffarabad</option>
+                    <option value="muzaffargarh">Muzaffargarh</option>
+                    <option value="nankanasahib">Nankana Sahib</option>
+                    <option value="narowal">Narowal</option>
+                    <option value="naushahrofiroz">Naushahro Firoz</option>
+                    <option value="nawabshah">Nawabshah</option>
+                    <option value="newmirpur">New Mirpur</option>
+                    <option value="nowshera">Nowshera</option>
+                    <option value="okara">Okara</option>
+                    <option value="pakpattan">Pakpattan</option>
+                    <option value="panjgur">Panjgur</option>
+                    <option value="parachinar">Parachinar</option>
+                    <option value="pattoki">Pattoki</option>
+                    <option value="peshawar">Peshawar</option>
+                    <option value="pishin">Pishin</option>
+                    <option value="qilasaifullah">Qila Saifullah</option>
+                    <option value="quetta">Quetta</option>
+                    <option value="rahimyarkhan">Rahimyar Khan</option>
+                    <option value="rajanpur">Rajanpur</option>
+                    <option value="rawalakot">Rawala Kot</option>
+                    <option value="rawalpindi">Rawalpindi</option>
+                    <option value="risalpurcant">Risalpur Cantonment</option>
+                    <option value="saddiqabad">Saddiqabad</option>
+                    <option value="saidusharif">Saidu Sharif</option>
+                    <option value="sahiwal">Sahiwal</option>
+                    <option value="sanghar">Sanghar</option>
+                    <option value="sargodha">Sargodha</option>
+                    <option value="shahhadkot">Shahdad Kot</option>
+                    <option value="shakargarh">Shakargarh</option>
+                    <option value="shekhupura">Shekhupura</option>
+                    <option value="shikarpur">Shikarpur</option>
+                    <option value="sibi">Sibi</option>
+                    <option value="sialkot">Sialkot</option>
+                    <option value="sialkotcity">Sialkot City</option>
+                    <option value="sukkur">Sukkur</option>
+                    <option value="swabi">Swabi</option>
+                    <option value="tandoallahyar">Tando Allahyar</option>
+                    <option value="tandum">Tando Muhammad Khan</option>
+                    <option value="tank">Tank</option>
+                    <option value="thatta">Thatta</option>
+                    <option value="timargara">Timargara</option>
+                    <option value="tobatek">Toba Tek Singh</option>
+                    <option value="turbat">Turbat</option>
+                    <option value="umarkot">Umarkot</option>
+                    <option value="upperdir">Upper Dir</option>
+                    <option value="uthal">Uthal</option>
+                    <option value="vihari">Vihari</option>
+                    <option value="zhob">Zhob</option>
+                    <option value="ziarat">Ziarat</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="category">Energy Category</label>
+                  <select id="category" name="category" required>
+                    <option value="">Select Category</option>
+                    <option value="residential">Residential</option>
+                    <option value="commercial">Commercial</option>
+                    <option value="industrial">Industrial</option>
+                    <option value="agricultural">Agricultural</option>
+                  </select>
+                </div>
+
+                <h3
+                  style="
+                    color: var(--electric);
+                    font-size: 1em;
+                    margin: 20px 0 14px;
+                  "
+                >
+                  Historical Data (kWh)
+                </h3>
+
+                <div class="form-group">
+                  <label for="weekLoad">Previous Week Total (kWh)</label>
+                  <input
+                    type="number"
+                    id="weekLoad"
+                    name="week_kwh"
+                    placeholder="e.g. 5000"
+                    min="1"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="monthLoad">Previous Month Total (kWh)</label>
+                  <input
+                    type="number"
+                    id="monthLoad"
+                    name="month_kwh"
+                    placeholder="e.g. 22000"
+                    min="1"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="yearLoad">Previous Year Total (kWh)</label>
+                  <input
+                    type="number"
+                    id="yearLoad"
+                    name="year_kwh"
+                    placeholder="e.g. 260000"
+                    min="1"
+                    required
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  id="predictBtn"
+                  class="btn-primary full-width"
+                  style="
+                    margin-top: 8px;
+                    padding: 16px;
+                    font-size: 1.05em;
+                    cursor: pointer;
+                    width: 100%;
+                  "
+                >
+                  Generate Forecast
+                </button>
+
+                <button
+                  type="button"
+                  id="historyToggleBtn"
+                  class="history-toggle-btn"
+                >
+                  View Prediction History
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <!-- ══ QUICK INFO ══════════════════════════════════ -->
+          <div>
+            <div class="card" style="margin-bottom: 24px">
+              <h3>How It Works</h3>
+              <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 24px;">
+                <div style="display: flex; gap: 16px; align-items: flex-start">
+                  <span style="background: rgba(0, 212, 255, 0.1); color: var(--accent-blue); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 0.9em; font-weight: bold; flex-shrink: 0;">1</span>
+                  <p style="color: var(--text-muted); font-size: 0.95em; margin: 0; line-height: 1.5;">Live weather fetched from <strong style="color: var(--text-primary)">Open-Meteo API</strong> for your city's exact GPS coordinates</p>
+                </div>
+                <div style="display: flex; gap: 16px; align-items: flex-start">
+                  <span style="background: rgba(0, 212, 255, 0.1); color: var(--accent-blue); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 0.9em; font-weight: bold; flex-shrink: 0;">2</span>
+                  <p style="color: var(--text-muted); font-size: 0.95em; margin: 0; line-height: 1.5;"><strong style="color: var(--text-primary)">300 training samples</strong> synthesised from your historical kWh + seasonal / weather patterns</p>
+                </div>
+                <div style="display: flex; gap: 16px; align-items: flex-start">
+                  <span style="background: rgba(0, 212, 255, 0.1); color: var(--accent-blue); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 0.9em; font-weight: bold; flex-shrink: 0;">3</span>
+                  <p style="color: var(--text-muted); font-size: 0.95em; margin: 0; line-height: 1.5;"><strong style="color: var(--text-primary)">Random Forest</strong> (100 trees, 11 features) trained separately for week, month, year</p>
+                </div>
+                <div style="display: flex; gap: 16px; align-items: flex-start">
+                  <span style="background: rgba(0, 212, 255, 0.1); color: var(--accent-blue); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 0.9em; font-weight: bold; flex-shrink: 0;">4</span>
+                  <p style="color: var(--text-muted); font-size: 0.95em; margin: 0; line-height: 1.5;">Results saved to <strong style="color: var(--text-primary)">database</strong> with feature importances and 7-day forecast</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3 style="margin-bottom: 20px;">Features Used</h3>
+              <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                <span class="tag-algo" style="font-size: 0.78em"
+                  >Historical Weekly kWh</span
+                >
+                <span class="tag-algo" style="font-size: 0.78em"
+                  >Historical Monthly kWh</span
+                >
+                <span class="tag-algo" style="font-size: 0.78em"
+                  >Historical Yearly kWh</span
+                >
+                <span class="tag-algo" style="font-size: 0.78em"
+                  >Temperature (°C)</span
+                >
+                <span class="tag-algo" style="font-size: 0.78em"
+                  >Humidity (%)</span
+                >
+                <span class="tag-algo" style="font-size: 0.78em"
+                  >Wind Speed</span
+                >
+                <span class="tag-algo" style="font-size: 0.78em"
+                  >Precipitation</span
+                >
+                <span class="tag-algo" style="font-size: 0.78em"
+                  >Cloud Cover</span
+                >
+                <span class="tag-algo" style="font-size: 0.78em"
+                  >Day of Year</span
+                >
+                <span class="tag-algo" style="font-size: 0.78em"
+                  >Hour of Day</span
+                >
+                <span class="tag-algo" style="font-size: 0.78em"
+                  >Weekend Flag</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- /grid -->
+
+        <!-- ══ RESULTS PANEL (hidden until prediction) ══════ -->
+        <div id="resultsPanel">
+          <hr style="border-color: var(--border); margin: 40px 0" />
+          <h2 style="margin-bottom: 8px">Prediction Results</h2>
+          <p
+            style="
+              color: var(--text-gray);
+              margin-bottom: 24px;
+              font-size: 0.9em;
+            "
+          >
+            Generated by Random Forest with live weather data
+          </p>
+
+          <!-- Summary Cards -->
+          <div id="predSummary"></div>
+
+          <!-- Weather strip -->
+          <div class="card" style="padding: 16px 20px; margin-bottom: 28px">
+            <h3
+              style="
+                font-size: 0.95em;
+                color: var(--electric);
+                margin-bottom: 10px;
+              "
+            >
+              🌤️ Live Weather at Prediction Time
+            </h3>
+            <div id="predWeather"></div>
+          </div>
+
+          <!-- 7-Day Chart -->
+          <div class="chart-section">
+            <div class="chart-header">
+              <h3>7-Day Daily Forecast</h3>
+              <div class="chart-switcher">
+                <button class="chart-btn active" data-chart="bar">Bar</button>
+                <button class="chart-btn" data-chart="line">Line</button>
+                <button class="chart-btn" data-chart="radar">Radar</button>
+              </div>
+            </div>
+            <canvas id="forecastChart"></canvas>
+          </div>
+
+          <!-- Model Explanation -->
+          <div class="card" style="margin-bottom: 28px">
+            <h3 style="color: var(--electric); margin-bottom: 16px">
+              🔬 How the Model Generated This Prediction
+            </h3>
+            <div id="predExplanation"></div>
+          </div>
+        </div>
+        <!-- /resultsPanel -->
+      </div>
+    </section>
+
+    <!-- HISTORY SIDEBAR -->
+    <div id="historySidebar">
+      <div class="history-header">
+        <h2>History</h2>
+        <button class="close-history" id="closeHistory">×</button>
+      </div>
+      <div class="history-list" id="historyList">
+        <!-- populated by JS -->
+        <div
+          class="empty-history"
+          style="text-align: center; color: var(--text-gray); margin-top: 40px"
+        >
+          No past predictions found.
+        </div>
+      </div>
+    </div>
+    <div class="history-overlay" id="historyOverlay"></div>
+
+    {% include "footer.html" %}
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="/static/js/theme.js"></script>
+    <script src="/static/js/sidebar.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/prediction.js"></script>
+  </body>
+</html>

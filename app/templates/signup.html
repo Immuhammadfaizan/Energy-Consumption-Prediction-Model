@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, 
+    initial-scale=1.0"
+    />
+    <title>Sign Up - FLUX</title>
+    <link rel="stylesheet" href="/static/css/credential.css" />
+    {% include "auth_bridge.html" %}
+  </head>
+
+  <body>
+    <!-- FLASH MESSAGES -->
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %}
+    <div
+      class="flash-messages"
+      style="
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        z-index: 9999;
+        max-width: 350px;
+      "
+    >
+      {% for category, message in messages %}
+      <div
+        class="flash-{{ category }}"
+        style="padding:12px 20px;margin-bottom:10px;border-radius:8px;font-size:0.9em;font-weight:600;{% if category == 'error' %}background:#ff4757;color:#fff;{% elif category == 'success' %}background:#2ed573;color:#111;{% else %}background:#1a1f3a;color:#e0e0e0;border:1px solid var(--border);{% endif %}"
+      >
+        {{ message }}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %} {% endwith %}
+
+    <!-- BACKGROUND FLOATING LOGOS -->
+    <div class="background-logo">
+      <svg width="50" height="50" viewBox="0 0 100 100">
+        <circle
+          cx="50"
+          cy="50"
+          r="45"
+          fill="none"
+          stroke="#00d4ff"
+          stroke-width="3"
+        />
+        <path d="M50 20 L70 80 L30 80 Z" fill="#00d4ff" opacity="0.8" />
+        <circle cx="50" cy="50" r="8" fill="#ff006e" />
+      </svg>
+    </div>
+    <div class="background-logo">
+      <svg width="50" height="50" viewBox="0 0 100 100">
+        <circle
+          cx="50"
+          cy="50"
+          r="45"
+          fill="none"
+          stroke="#00d4ff"
+          stroke-width="3"
+        />
+        <path d="M50 20 L70 80 L30 80 Z" fill="#00d4ff" opacity="0.8" />
+        <circle cx="50" cy="50" r="8" fill="#ff006e" />
+      </svg>
+    </div>
+    <div class="background-logo">
+      <svg width="50" height="50" viewBox="0 0 100 100">
+        <circle
+          cx="50"
+          cy="50"
+          r="45"
+          fill="none"
+          stroke="#00d4ff"
+          stroke-width="3"
+        />
+        <path d="M50 20 L70 80 L30 80 Z" fill="#00d4ff" opacity="0.8" />
+        <circle cx="50" cy="50" r="8" fill="#ff006e" />
+      </svg>
+    </div>
+    <div class="background-logo">
+      <svg width="50" height="50" viewBox="0 0 100 100">
+        <circle
+          cx="50"
+          cy="50"
+          r="45"
+          fill="none"
+          stroke="#00d4ff"
+          stroke-width="3"
+        />
+        <path d="M50 20 L70 80 L30 80 Z" fill="#00d4ff" opacity="0.8" />
+        <circle cx="50" cy="50" r="8" fill="#ff006e" />
+      </svg>
+    </div>
+    <div class="background-logo">
+      <svg width="50" height="50" viewBox="0 0 100 100">
+        <circle
+          cx="50"
+          cy="50"
+          r="45"
+          fill="none"
+          stroke="#00d4ff"
+          stroke-width="3"
+        />
+        <path d="M50 20 L70 80 L30 80 Z" fill="#00d4ff" opacity="0.8" />
+        <circle cx="50" cy="50" r="8" fill="#ff006e" />
+      </svg>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+      <div class="auth-container">
+        <!-- FORM SECTION -->
+        <div class="auth-form">
+          <div class="form-card">
+            <h2>Create Account</h2>
+            <p>Join us to predict and optimize your energy consumption</p>
+
+            <div id="alertContainer"></div>
+
+            <form id="signupForm" action="/auth/signup" method="POST">
+              <div class="form-group">
+                <label for="fullname">Full Name</label>
+                <input
+                  type="text"
+                  id="fullname"
+                  name="fullname"
+                  placeholder="John Doe"
+                  required
+                  autocomplete="name"
+                />
+                <span class="error" id="fullnameError"></span>
+              </div>
+
+              <div class="form-group">
+                <label for="email">Email Address</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  placeholder="you@example.com"
+                  required
+                  autocomplete="email"
+                />
+                <span class="error" id="emailError"></span>
+              </div>
+
+              <div class="form-group">
+                <label for="organization">Organization Name</label>
+                <input
+                  type="text"
+                  id="organization"
+                  name="organization"
+                  placeholder="Your Company"
+                  required
+                />
+                <span class="error" id="organizationError"></span>
+              </div>
+
+              <div class="form-group">
+                <label for="password">Password</label>
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  placeholder="••••••••"
+                  required
+                  autocomplete="new-password"
+                />
+                <span class="error" id="passwordError"></span>
+              </div>
+
+              <div class="form-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <input
+                  type="password"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  placeholder="••••••••"
+                  required
+                  autocomplete="new-password"
+                />
+                <span class="error" id="confirmPasswordError"></span>
+              </div>
+
+              <div class="form-group">
+                <label for="city">City</label>
+                <select id="city" name="city" required>
+                  <option value="">Select a City</option>
+                  <option value="abbottabad">Abbottabad</option>
+                  <option value="abdulhakim">Abdul Hakim</option>
+                  <option value="aliabad">Aliabad</option>
+                  <option value="alpurai">Alpurai</option>
+                  <option value="athmuqam">Athmuqam</option>
+                  <option value="attockcity">Attock City</option>
+                  <option value="awaran">Awaran</option>
+                  <option value="badin">Badin</option>
+                  <option value="bagh">Bagh</option>
+                  <option value="bahawalnagar">Bahawalnagar</option>
+                  <option value="bahawalpur">Bahawalpur</option>
+                  <option value="bannu">Bannu</option>
+                  <option value="barkhan">Barkhan</option>
+                  <option value="batgram">Batgram</option>
+                  <option value="bhakkar">Bhakkar</option>
+                  <option value="chakwal">Chakwal</option>
+                  <option value="chaman">Chaman</option>
+                  <option value="charsadda">Charsadda</option>
+                  <option value="chilas">Chilas</option>
+                  <option value="chiniot">Chiniot</option>
+                  <option value="chitral">Chitral</option>
+                  <option value="dadu">Dadu</option>
+                  <option value="daggar">Daggar</option>
+                  <option value="dainyor">Dainyor</option>
+                  <option value="dalbandin">Dalbandin</option>
+                  <option value="dasu">Dasu</option>
+                  <option value="deraallahyar">Dera Allahyar</option>
+                  <option value="derabugti">Dera Bugti</option>
+                  <option value="deraghazikhan">Dera Ghazi Khan</option>
+                  <option value="deraismail">Dera Ismail Khan</option>
+                  <option value="deramurad">Dera Murad Jamali</option>
+                  <option value="eidgah">Eidgah</option>
+                  <option value="faisalabad">Faisalabad</option>
+                  <option value="gakuch">Gakuch</option>
+                  <option value="gandava">Gandava</option>
+                  <option value="ghotki">Ghotki</option>
+                  <option value="gilgit">Gilgit</option>
+                  <option value="gojra">Gojra</option>
+                  <option value="gujranwala">Gujranwala</option>
+                  <option value="gujrat">Gujrat</option>
+                  <option value="gwadar">Gwadar</option>
+                  <option value="hafizabad">Hafizabad</option>
+                  <option value="hangu">Hangu</option>
+                  <option value="haripur">Haripur</option>
+                  <option value="harunabad">Harunabad</option>
+                  <option value="hasilpur">Hasilpur</option>
+                  <option value="hassanabdal">Hassan Abdal</option>
+                  <option value="hujrashahmuqim">Hujra Shah Muqim</option>
+                  <option value="hyderabad">Hyderabad City</option>
+                  <option value="islamabad">Islamabad</option>
+                  <option value="jacobabad">Jacobabad</option>
+                  <option value="jalalpurjattan">Jalapur Jattan</option>
+                  <option value="jamshoro">Jamshoro</option>
+                  <option value="jaranwala">Jaranwala</option>
+                  <option value="jhangcity">Jhang City</option>
+                  <option value="jhelum">Jhelum</option>
+                  <option value="kabirwala">Kabirwala</option>
+                  <option value="kalat">Kalat</option>
+                  <option value="kamalia">Kamalia</option>
+                  <option value="kandhkot">Kandhkot</option>
+                  <option value="karachi">Karachi</option>
+                  <option value="karak">Karak</option>
+                  <option value="kasur">Kasur</option>
+                  <option value="khairpurmirs">Khairpur Mir's</option>
+                  <option value="khanewal">Khanewal</option>
+                  <option value="khanpur">Khanpur</option>
+                  <option value="kharan">Kharan</option>
+                  <option value="kharian">Kharian</option>
+                  <option value="khushab">Khushab</option>
+                  <option value="khuzdar">Khuzdar</option>
+                  <option value="kohat">Kohat</option>
+                  <option value="kohlu">Kohlu</option>
+                  <option value="kotaddu">Kot Addu</option>
+                  <option value="kotli">Kotli</option>
+                  <option value="kulachi">Kulachi</option>
+                  <option value="kundian">Kundian</option>
+                  <option value="lahore">Lahore</option>
+                  <option value="lakki">Lakki</option>
+                  <option value="lalamusa">Lala Musa</option>
+                  <option value="larkana">Larkana</option>
+                  <option value="leiah">Leiah</option>
+                  <option value="lodhran">Lodhran</option>
+                  <option value="loralai">Loralai</option>
+                  <option value="malakand">Malakand</option>
+                  <option value="mandibahauddin">Mandi Bahauddin</option>
+                  <option value="mandiburewala">Mandi Burewala</option>
+                  <option value="mansehra">Mansehra</option>
+                  <option value="mardan">Mardan</option>
+                  <option value="mastung">Mastung</option>
+                  <option value="matiari">Matiari</option>
+                  <option value="mianchannun">Mian Channun</option>
+                  <option value="mianwali">Mianwali</option>
+                  <option value="mingaora">Mingaora</option>
+                  <option value="mirpurkhas">Mirpur Khas</option>
+                  <option value="multan">Multan</option>
+                  <option value="muridke">Muridke</option>
+                  <option value="musakhelb">Musa Khel Bazar</option>
+                  <option value="muzaffarabad">Muzaffarabad</option>
+                  <option value="muzaffargarh">Muzaffargarh</option>
+                  <option value="nankanasahib">Nankana Sahib</option>
+                  <option value="narowal">Narowal</option>
+                  <option value="naushahrofiroz">Naushahro Firoz</option>
+                  <option value="nawabshah">Nawabshah</option>
+                  <option value="newmirpur">New Mirpur</option>
+                  <option value="nowshera">Nowshera</option>
+                  <option value="okara">Okara</option>
+                  <option value="pakpattan">Pakpattan</option>
+                  <option value="panjgur">Panjgur</option>
+                  <option value="parachinar">Parachinar</option>
+                  <option value="pattoki">Pattoki</option>
+                  <option value="peshawar">Peshawar</option>
+                  <option value="pishin">Pishin</option>
+                  <option value="qilasaifullah">Qila Saifullah</option>
+                  <option value="quetta">Quetta</option>
+                  <option value="rahimyarkhan">Rahimyar Khan</option>
+                  <option value="rajanpur">Rajanpur</option>
+                  <option value="rawalakot">Rawala Kot</option>
+                  <option value="rawalpindi">Rawalpindi</option>
+                  <option value="risalpurcant">Risalpur Cantonment</option>
+                  <option value="saddiqabad">Saddiqabad</option>
+                  <option value="saidusharif">Saidu Sharif</option>
+                  <option value="sahiwal">Sahiwal</option>
+                  <option value="sanghar">Sanghar</option>
+                  <option value="sargodha">Sargodha</option>
+                  <option value="shahhadkot">Shahdad Kot</option>
+                  <option value="shakargarh">Shakargarh</option>
+                  <option value="shekhupura">Shekhupura</option>
+                  <option value="shikarpur">Shikarpur</option>
+                  <option value="sibi">Sibi</option>
+                  <option value="sialkot">Sialkot</option>
+                  <option value="sialkotcity">Sialkot City</option>
+                  <option value="sukkur">Sukkur</option>
+                  <option value="swabi">Swabi</option>
+                  <option value="tandoallahyar">Tando Allahyar</option>
+                  <option value="tandum">Tando Muhammad Khan</option>
+                  <option value="tank">Tank</option>
+                  <option value="thatta">Thatta</option>
+                  <option value="timargara">Timargara</option>
+                  <option value="tobatek">Toba Tek Singh</option>
+                  <option value="turbat">Turbat</option>
+                  <option value="umarkot">Umarkot</option>
+                  <option value="upperdir">Upper Dir</option>
+                  <option value="uthal">Uthal</option>
+                  <option value="vihari">Vihari</option>
+                  <option value="zhob">Zhob</option>
+                  <option value="ziarat">Ziarat</option>
+                </select>
+                <span class="error" id="cityError"></span>
+              </div>
+
+              <div class="form-group">
+                <label for="category">Category</label>
+                <select id="category" name="category" required>
+                  <option value="">Select a Category</option>
+                  <option value="residential">Residential</option>
+                  <option value="commercial">Commercial</option>
+                  <option value="industrial">Industrial</option>
+                  <option value="agricultural">Agricultural</option>
+                </select>
+                <span class="error" id="categoryError"></span>
+              </div>
+
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="terms" name="terms" required />
+                  I agree to the Terms and Conditions
+                </label>
+                <span class="error" id="termsError"></span>
+              </div>
+
+              <button type="submit" class="form-submit">Create Account</button>
+            </form>
+
+            <div class="form-footer">
+              <p>
+                Already have an account?
+                <a href="/auth/login" class="redirect-link">Login here</a>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- IMAGE SECTION (Decorative) -->
+        <div class="auth-image">
+          <h3
+            style="color: var(--electric); margin-bottom: 20px; font-size: 24px"
+          >
+            Start Predicting Today
+          </h3>
+          <svg
+            width="400"
+            height="400"
+            viewBox="0 0 300 300"
+            style="max-width: 100%"
+            class="animated-svg"
+          >
+            <style>
+              @keyframes rotateCW {
+                from {
+                  transform: rotate(0deg);
+                }
+                to {
+                  transform: rotate(360deg);
+                }
+              }
+              @keyframes rotateCCW {
+                from {
+                  transform: rotate(360deg);
+                }
+                to {
+                  transform: rotate(0deg);
+                }
+              }
+              @keyframes floatPoly {
+                0%,
+                100% {
+                  transform: translateY(0px);
+                }
+                50% {
+                  transform: translateY(-15px);
+                }
+              }
+              @keyframes pulsePoly {
+                0%,
+                100% {
+                  opacity: 1;
+                }
+                50% {
+                  opacity: 0.7;
+                }
+              }
+              @keyframes glowSVG {
+                0%,
+                100% {
+                  filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.3));
+                }
+                50% {
+                  filter: drop-shadow(0 0 25px rgba(0, 212, 255, 0.6));
+                }
+              }
+
+              .svg-container {
+                filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.3));
+                animation: glowSVG 3s ease-in-out infinite;
+              }
+
+              .rotate-cw {
+                transform-origin: 150px 150px;
+                animation: rotateCW 8s linear infinite;
+              }
+
+              .rotate-ccw {
+                transform-origin: 150px 150px;
+                animation: rotateCCW 12s linear infinite;
+              }
+
+              .float-pulse {
+                transform-origin: 150px 120px;
+                animation:
+                  floatPoly 4s ease-in-out infinite,
+                  pulsePoly 3s ease-in-out infinite;
+              }
+            </style>
+
+            <g class="svg-container">
+              <!-- Outer rotating circle -->
+              <g class="rotate-cw">
+                <circle
+                  cx="150"
+                  cy="150"
+                  r="120"
+                  fill="rgba(0, 212, 255, 0.1)"
+                  stroke="#00d4ff"
+                  stroke-width="2"
+                />
+              </g>
+
+              <!-- Inner rotating circle (opposite direction) -->
+              <g class="rotate-ccw">
+                <circle
+                  cx="150"
+                  cy="150"
+                  r="90"
+                  fill="rgba(255, 0, 110, 0.05)"
+                  stroke="#ff006e"
+                  stroke-width="2"
+                />
+              </g>
+
+              <!-- Floating animated polygon -->
+              <g class="float-pulse">
+                <polygon
+                  points="150,60 220,200 80,200"
+                  fill="rgba(0, 212, 255, 0.1)"
+                  stroke="#00d4ff"
+                  stroke-width="2"
+                />
+              </g>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <script src="/static/js/theme.js"></script>
+    <script src="/static/js/auth.js"></script>
+  </body>
+</html>

@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FLUX — Smart Energy Dashboard</title>
+    <meta name="description" content="AI-powered energy consumption forecasting for organizations across Pakistan. Real-time meteorological data meets machine learning." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="stylesheet" href="/static/css/headfoot.css" />
+    <link rel="stylesheet" href="/static/css/home.css" />
+    {% include "auth_bridge.html" %}
+  </head>
+  <body>
+
+    {% include "header.html" %}
+
+    <!-- ─── HERO ─── -->
+    <section class="home-hero">
+      <div class="hero-bg-film"></div>
+      <div class="home-hero-inner container">
+        <div class="hero-badge">
+          <span class="hero-badge-dot"></span>
+          Live Platform · Pakistan
+        </div>
+        <h1 class="hero-heading">
+          Intelligent<br/>
+          <span class="text-gradient">Energy Forecasting</span>
+        </h1>
+        <p class="hero-sub">
+          Harness AI & real-time meteorological data to predict, analyze, and
+          optimize energy consumption for your organization.
+        </p>
+        <div class="hero-actions">
+          <a href="/prediction" class="btn-hero-primary">Start Prediction</a>
+          <a href="/statistics" class="btn-hero-outline">View Analytics</a>
+        </div>
+        <!-- Floating stat chips -->
+        <div class="hero-chips">
+          <div class="chip"><span class="chip-val" id="heroUserCount">—</span><span class="chip-label">Organizations</span></div>
+          <div class="chip"><span class="chip-val" id="heroPredCount">—</span><span class="chip-label">Predictions Run</span></div>
+          <div class="chip accent-green"><span class="chip-val">30+</span><span class="chip-label">Cities Covered</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── USER DASHBOARD (logged-in) ─── -->
+    <section id="userDashboard" style="display:none" class="section-pad">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Your Dashboard</h2>
+            <p class="section-sub">Real-time overview of your energy data</p>
+          </div>
+          <a href="/prediction" class="btn-outline-sm">New Prediction</a>
+        </div>
+
+        <!-- KPI Row -->
+        <div class="dash-grid">
+          <div class="dash-card accent-blue">
+            <div class="dash-card-label">Latest Forecast</div>
+            <div class="dash-card-value" id="dashLatestForecast">— kWh</div>
+            <div class="dash-card-sub" id="dashForecastPeriod">Weekly estimate</div>
+          </div>
+          <div class="dash-card accent-pink">
+            <div class="dash-card-label">Monthly Forecast</div>
+            <div class="dash-card-value" id="dashMonthForecast">— kWh</div>
+            <div class="dash-card-sub">Next 30 days</div>
+          </div>
+          <div class="dash-card accent-green">
+            <div class="dash-card-label">Growth Trend</div>
+            <div class="dash-card-value" id="dashGrowth">—%</div>
+            <div class="dash-card-sub">vs. previous period</div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card-label">Total Predictions</div>
+            <div class="dash-card-value" id="dashTotalPreds">—</div>
+            <div class="dash-card-sub">Your account lifetime</div>
+          </div>
+        </div>
+
+        <!-- Quick Nav Cards -->
+        <div class="quick-nav-grid">
+          <a href="/prediction" class="quick-nav-card">
+            <div class="qnc-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+              </svg>
+            </div>
+            <div class="qnc-content">
+              <div class="qnc-title">Generate Prediction</div>
+              <div class="qnc-desc">Run a new AI forecast using your organization's parameters and live weather data</div>
+            </div>
+            <div class="qnc-arrow">→</div>
+          </a>
+
+          <a href="/statistics" class="quick-nav-card">
+            <div class="qnc-icon accent-pink">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+              </svg>
+            </div>
+            <div class="qnc-content">
+              <div class="qnc-title">Analytics & Statistics</div>
+              <div class="qnc-desc">Explore weekly, monthly and yearly trends with interactive charts and breakdowns</div>
+            </div>
+            <div class="qnc-arrow">→</div>
+          </a>
+
+          <a href="/about" class="quick-nav-card">
+            <div class="qnc-icon accent-green">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+            </div>
+            <div class="qnc-content">
+              <div class="qnc-title">About the Platform</div>
+              <div class="qnc-desc">Learn about our Random Forest model, the technology stack and our coverage</div>
+            </div>
+            <div class="qnc-arrow">→</div>
+          </a>
+        </div>
+
+        <!-- Recent Activity (logged-in) -->
+        <div class="dash-panel">
+          <div class="dash-panel-header">
+            <div>
+              <h3>Recent Predictions</h3>
+              <p>Your last 5 energy forecasts</p>
+            </div>
+            <a href="/statistics" class="btn-outline-sm">Full History</a>
+          </div>
+          <table class="dash-table">
+            <thead>
+              <tr>
+                <th>Organization</th>
+                <th>Week (kWh)</th>
+                <th>Month (kWh)</th>
+                <th>Year (kWh)</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="recentPredBody">
+              <tr><td colspan="5" class="table-empty">Loading your data...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── FEATURES (shown to everyone) ─── -->
+    <section class="section-pad features-section">
+      <div class="container">
+        <div class="section-header center">
+          <div>
+            <h2 class="section-title">Platform Capabilities</h2>
+            <p class="section-sub">Everything your organization needs for intelligent energy management</p>
+          </div>
+        </div>
+        <div class="features-grid">
+          <div class="feat-card">
+            <div class="feat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+              </svg>
+            </div>
+            <h4>Real-Time Predictions</h4>
+            <p>AI-powered weekly, monthly and annual energy forecasts generated in seconds using live weather data.</p>
+            <a href="/prediction" class="feat-link">Run Forecast →</a>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon accent-pink">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/>
+              </svg>
+            </div>
+            <h4>Geographic Precision</h4>
+            <p>30+ Pakistani cities covered using Open-Meteo meteorological APIs for hyper-local accuracy.</p>
+            <a href="/prediction" class="feat-link">Select City →</a>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon accent-green">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+              </svg>
+            </div>
+            <h4>Comprehensive Analytics</h4>
+            <p>Interactive charts for weekly/monthly/yearly trends, category breakdowns and growth analysis.</p>
+            <a href="/statistics" class="feat-link">Explore Stats →</a>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon accent-amber">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </div>
+            <h4>Enterprise Security</h4>
+            <p>Encrypted data storage with role-based access control, audit trails and admin oversight.</p>
+            <a href="/about" class="feat-link">Learn More →</a>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon accent-purple">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+              </svg>
+            </div>
+            <h4>Random Forest AI</h4>
+            <p>300-tree ensemble model trained on regional energy and weather data for superior prediction accuracy.</p>
+            <a href="/about" class="feat-link">Technical Details →</a>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
+            <h4>Multi-Organization</h4>
+            <p>Track predictions across your organization's departments with admin-level oversight and reporting.</p>
+            <a href="/about" class="feat-link">About Platform →</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── HOW IT WORKS ─── -->
+    <section class="section-pad how-section">
+      <div class="container">
+        <div class="section-header center">
+          <div>
+            <h2 class="section-title">How It Works</h2>
+            <p class="section-sub">Three steps from input to intelligent forecast</p>
+          </div>
+        </div>
+        <div class="steps-grid">
+          <div class="step-card">
+            <div class="step-num">01</div>
+            <h4>Input Parameters</h4>
+            <p>Select your city, enter office space size, number of floors and AC units. The system fetches live weather conditions automatically.</p>
+          </div>
+          <div class="step-divider"></div>
+          <div class="step-card">
+            <div class="step-num">02</div>
+            <h4>AI Processing</h4>
+            <p>Our 300-tree Random Forest ensemble analyses weather patterns, historical usage and operational parameters in milliseconds.</p>
+          </div>
+          <div class="step-divider"></div>
+          <div class="step-card">
+            <div class="step-num">03</div>
+            <h4>Actionable Forecast</h4>
+            <p>Receive precise weekly, monthly and annual energy predictions with growth trend analysis and optimization insights.</p>
+          </div>
+        </div>
+        <div class="how-cta">
+          <a href="/prediction" class="btn-hero-primary">Get Your First Forecast</a>
+        </div>
+      </div>
+    </section>
+
+    {% include "footer.html" %}
+
+    <script src="/static/js/theme.js"></script>
+    <script src="/static/js/sidebar.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/main.js"></script>
+  </body>
+</html>
