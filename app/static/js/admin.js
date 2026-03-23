@@ -170,6 +170,7 @@ function setupProfilePopup() {
           localStorage.setItem("currentUser", JSON.stringify(currentUser));
           updateAdminAuthUI();
           fillProfilePopup();
+          displayAdminInfo();
           showToast("Admin profile photo updated!");
         } else {
           showToast(data.error || "Upload failed", true);
@@ -205,6 +206,11 @@ function fillProfilePopup() {
     currentUser.organization || "—";
   document.getElementById("profileCity").textContent =
     cityMap[currentUser.city] || currentUser.city || "—";
+
+  // Popup Avatar
+  const avatarPath = currentUser.profile_pic || "/static/images/default-avatar.png";
+  const popupAv = document.getElementById("popupAvatar");
+  if (popupAv) popupAv.src = avatarPath;
 }
 
 // ── Admin Tabs ───────────────────────────────────────────────────
@@ -1287,6 +1293,10 @@ function displayAdminInfo() {
     const d = new Date(currentUser.createdAt || currentUser.created_at);
     joinedEl.textContent = !isNaN(d) ? d.toLocaleDateString() : "—";
   }
+
+  // Admin Account Avatar
+  const accountAv = document.getElementById("adminAccountAvatar");
+  if (accountAv) accountAv.src = currentUser.profile_pic || "/static/images/default-avatar.png";
 
   // Start real-time session stay timer
   startSessionTimer();

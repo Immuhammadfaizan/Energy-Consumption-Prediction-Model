@@ -468,7 +468,7 @@ tbody tr:last-child td {
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   z-index: 2000;
-  min-width: 260px;
+  width: 340px;
   animation: hfSlideDown 200ms ease;
 }
 
@@ -493,21 +493,25 @@ tbody tr:last-child td {
 
 .profile-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 16px 18px;
+  gap: 15px;
+  padding: 18px;
   border-bottom: 1px solid var(--border);
 }
 
 .profile-header h3 {
   color: var(--electric);
-  font-size: 1em;
+  font-size: 1.05em;
   font-weight: 700;
   margin: 0;
   font-family: "Inter", sans-serif;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .close-popup {
+  margin-left: auto;
   background: none;
   border: none;
   color: var(--text-muted);
@@ -804,9 +808,10 @@ tbody tr:last-child td {
 
 .profile-avatar-container {
   position: relative;
-  width: 80px;
-  height: 80px;
-  margin: 0 auto 15px;
+  width: 64px;
+  height: 64px;
+  margin: 0;
+  flex-shrink: 0;
 }
 
 .profile-avatar-container img {
@@ -820,10 +825,10 @@ tbody tr:last-child td {
 
 .avatar-edit-label {
   position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 28px;
-  height: 28px;
+  bottom: -2px;
+  right: -2px;
+  width: 24px;
+  height: 24px;
   background: var(--electric);
   color: #000;
   border-radius: 50%;
