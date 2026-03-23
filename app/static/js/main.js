@@ -65,6 +65,20 @@ function updateAuthUI() {
     if (pCity)  pCity.textContent  = user.city     || "—";
     if (pRole)  pRole.textContent  = isAdmin ? "Administrator" : "User";
 
+    // Profile Pictures
+    const avatarPath = user.profile_pic || "/static/images/default-avatar.png";
+    const headerAv = document.getElementById("headerAvatar");
+    const popupAv  = document.getElementById("popupAvatar");
+    const footerAv = document.getElementById("footerAvatar");
+    const footerWrap = document.getElementById("footerUserWrap");
+    const footerName = document.getElementById("footerUserName");
+
+    if (headerAv) headerAv.src = avatarPath;
+    if (popupAv)  popupAv.src  = avatarPath;
+    if (footerAv) footerAv.src = avatarPath;
+    if (footerWrap) footerWrap.style.display = "flex";
+    if (footerName) footerName.textContent = user.fullname || user.email;
+
   } else {
     if (userEmailBtn) userEmailBtn.style.display = "none";
     if (authBtn)      authBtn.style.display = "inline-flex";
@@ -102,6 +116,41 @@ function setupProfilePopup() {
       popup.style.display = "none";
     }
   });
+
+  // Avatar Upload Handling
+  const uploadInput = document.getElementById("avatarUpload");
+  if (uploadInput) {
+    uploadInput.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const res = await fetch("/api/profile/upload", {
+          method: "POST",
+          body: formData,
+        });
+        const data = await res.json();
+        if (data.success) {
+          // Update local state
+          window.currentUser.profile_pic = data.profile_pic;
+          localStorage.setItem("currentUser", JSON.stringify(window.currentUser));
+          
+          // Refresh UI
+          updateAuthUI();
+          // Also show a toast if available
+          if (typeof showToast === 'function') showToast("Profile photo updated!");
+        } else {
+          alert(data.error || "Upload failed");
+        }
+      } catch (err) {
+        console.error("Upload error:", err);
+        alert("An error occurred during upload.");
+      }
+    });
+  }
 
   if (logoutPop) logoutPop.addEventListener("click", doLogout);
 }
@@ -187,6 +236,9 @@ async function loadDashboardKPIs() {
 
     // Recent predictions table
     renderRecentPreds(preds.slice(0, 5));
+    
+    // Category Breakdown (home dashboard)
+    renderHomeBreakdown(preds);
 
   } catch (err) {
     console.error("Dashboard load error:", err);
@@ -216,6 +268,48 @@ function renderRecentPreds(preds) {
         <td style="color:var(--electric)">${(p.year_val  || 0).toLocaleString(undefined,{maximumFractionDigits:1})}</td>
         <td style="color:var(--text-muted);font-size:0.82em">${d}</td>
       </tr>`;
+  }).join("");
+}
+
+function renderHomeBreakdown(preds) {
+  const container = document.getElementById("homeCategoryBreakdown");
+  if (!container) return;
+
+  if (preds.length === 0) {
+    container.innerHTML = `<p style="color:var(--text-muted); font-size:0.85em; text-align:center;">No data to analyze.</p>`;
+    return;
+  }
+
+  const counts = {};
+  preds.forEach(p => {
+    const cat = (p.category || "other").toLowerCase();
+    counts[cat] = (counts[cat] || 0) + 1;
+  });
+
+  const total = preds.length;
+  const categories = [
+    { id: "residential", label: "Residential", color: "#0ea5e9" },
+    { id: "industrial", label: "Industrial", color: "#64748b" },
+    { id: "agricultural", label: "Agricultural", color: "#f59e0b" },
+    { id: "commercial", label: "Commercial", color: "#f97316" },
+    { id: "street_lighting", label: "Street Lighting", color: "#06b6d4" },
+    { id: "other", label: "Other", color: "#22c55e" }
+  ];
+
+  container.innerHTML = categories.map(cat => {
+    const count = counts[cat.id] || 0;
+    const pct = Math.round((count / total) * 100);
+    return `
+      <div class="breakdown-item">
+        <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:0.82em;">
+          <span style="color:var(--text-primary); font-weight:600;">${cat.label}</span>
+          <span style="color:var(--text-muted);">${pct}%</span>
+        </div>
+        <div style="height:6px; background:rgba(255,255,255,0.05); border-radius:10px; overflow:hidden;">
+          <div style="height:100%; width:${pct}%; background:${cat.color}; border-radius:10px;"></div>
+        </div>
+      </div>
+    `;
   }).join("");
 }
 

@@ -14,6 +14,7 @@ class User(db.Model):
     category = db.Column(db.String(50), default='general')
     password_hash = db.Column(db.String(255), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
+    profile_pic = db.Column(db.String(255), default='/static/images/default-avatar.png')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_login = db.Column(db.DateTime)
 
@@ -36,6 +37,7 @@ class User(db.Model):
             'city': self.city,
             'category': self.category,
             'is_admin': self.is_admin,
+            'profile_pic': self.profile_pic or '/static/images/default-avatar.png',
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'last_login': self.last_login.isoformat() if self.last_login else None
         }

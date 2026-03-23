@@ -1,5 +1,8 @@
 import traceback
-from flask import Blueprint, jsonify, request, session
+import os
+import time
+from werkzeug.utils import secure_filename
+from flask import Blueprint, jsonify, request, session, current_app
 from app.utils.decorators import login_required
 from app.models.prediction import Prediction, save_prediction, get_predictions_by_user, get_all_predictions
 from app.models.user import User
@@ -98,6 +101,43 @@ def get_users_count():
         return jsonify({"success": True, "count": count})
     except Exception as e:
         return jsonify({"success": False, "count": 0, "error": str(e)})
+
+@api_bp.route('/profile/upload', methods=['POST'])
+@login_required
+def upload_profile():
+    if 'file' not in request.files:
+        return jsonify({"success": False, "error": "No file part"}), 400
+    
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"success": False, "error": "No selected file"}), 400
+
+    if file:
+        filename = secure_filename(file.filename)
+        ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
+        if ext not in ['jpg', 'jpeg', 'png', 'gif']:
+            return jsonify({"success": False, "error": "Invalid file type. Only JPG, PNG, GIF allowed."}), 400
+
+        # Unique filename: user_id_timestamp.ext
+        new_filename = f"user_{session['user_id']}_{int(time.time())}.{ext}"
+        
+        # Ensure directory exists (just in case)
+        upload_dir = os.path.join(current_app.root_path, 'static', 'uploads', 'profiles')
+        if not os.path.exists(upload_dir):
+            os.makedirs(upload_dir)
+
+        file_path = os.path.join(upload_dir, new_filename)
+        file.save(file_path)
+
+        # Update DB
+        user = User.query.get(session['user_id'])
+        if user:
+            relative_path = f"/static/uploads/profiles/{new_filename}"
+            user.profile_pic = relative_path
+            db.session.commit()
+            return jsonify({"success": True, "profile_pic": relative_path})
+        
+        return jsonify({"success": False, "error": "User not found"}), 404
 
 @api_bp.route('/predictions/count')
 def get_predictions_count():

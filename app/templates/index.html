@@ -120,29 +120,44 @@
           </a>
         </div>
 
-        <!-- Recent Activity (logged-in) -->
-        <div class="dash-panel">
-          <div class="dash-panel-header">
-            <div>
-              <h3>Recent Predictions</h3>
-              <p>Your last 5 energy forecasts</p>
+        <!-- Recent Activity & Breakdown Row -->
+        <div class="grid-2" style="margin-top: 30px; gap: 30px; display: grid; grid-template-columns: 1fr 350px;">
+          <div class="dash-panel">
+            <div class="dash-panel-header">
+              <div>
+                <h3>Recent Predictions</h3>
+                <p>Your last 5 energy forecasts</p>
+              </div>
+              <a href="/statistics" class="btn-outline-sm">Full History</a>
             </div>
-            <a href="/statistics" class="btn-outline-sm">Full History</a>
+            <table class="dash-table">
+              <thead>
+                <tr>
+                  <th>Organization</th>
+                  <th>Week (kWh)</th>
+                  <th>Month (kWh)</th>
+                  <th>Year (kWh)</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody id="recentPredBody">
+                <tr><td colspan="5" class="table-empty">Loading your data...</td></tr>
+              </tbody>
+            </table>
           </div>
-          <table class="dash-table">
-            <thead>
-              <tr>
-                <th>Organization</th>
-                <th>Week (kWh)</th>
-                <th>Month (kWh)</th>
-                <th>Year (kWh)</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody id="recentPredBody">
-              <tr><td colspan="5" class="table-empty">Loading your data...</td></tr>
-            </tbody>
-          </table>
+
+          <div class="dash-panel">
+            <div class="dash-panel-header">
+              <div>
+                <h3>Consumption Breakdown</h3>
+                <p>By sector distribution</p>
+              </div>
+            </div>
+            <div id="homeCategoryBreakdown" class="breakdown-list" style="margin-top: 20px; display: flex; flex-direction: column; gap: 18px;">
+               <!-- Populated by main.js -->
+               <p style="color:var(--text-muted); font-size:0.9em; text-align:center;">Loading sectors...</p>
+            </div>
+          </div>
         </div>
       </div>
     </section>

@@ -115,6 +115,11 @@ function updateAdminAuthUI() {
   if (nameEl) nameEl.textContent = firstName;
   if (trigger) trigger.style.display = "flex";
   if (logoutEl) logoutEl.style.display = "inline-flex";
+
+  // Profile Picture
+  const avatarPath = currentUser.profile_pic || "/static/images/default-avatar.png";
+  const headerAv = document.getElementById("headerAvatar");
+  if (headerAv) headerAv.src = avatarPath;
 }
 
 // ── Profile Popup
@@ -143,6 +148,38 @@ function setupProfilePopup() {
     popup.style.display = "none";
     popup.classList.remove("show");
   });
+
+  // Avatar Upload Handling (Admin)
+  const uploadInput = document.getElementById("avatarUpload");
+  if (uploadInput) {
+    uploadInput.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const res = await fetch("/api/profile/upload", {
+          method: "POST",
+          body: formData,
+        });
+        const data = await res.json();
+        if (data.success) {
+          currentUser.profile_pic = data.profile_pic;
+          localStorage.setItem("currentUser", JSON.stringify(currentUser));
+          updateAdminAuthUI();
+          fillProfilePopup();
+          showToast("Admin profile photo updated!");
+        } else {
+          showToast(data.error || "Upload failed", true);
+        }
+      } catch (err) {
+        console.error(err);
+        showToast("An error occurred during upload.", true);
+      }
+    });
+  }
 
   document.addEventListener("click", (e) => {
     if (
@@ -360,9 +397,11 @@ function buildActivityLog() {
   allPredictions.forEach((p) => {
     const user = allUsers.find((u) => u.id === (p.user_id || p.userId));
     if (p.created_at || p.createdAt) {
+      const cat = (p.category || user?.category || "Other").trim();
       events.push({
         user: p.user_fullname || user?.fullname || "Unknown",
         activity: `Generated Prediction (${p.city || "System"})`,
+        category: cat,
         timestamp: new Date(p.created_at || p.createdAt),
         statusCls: "info",
         statusTxt: "Completed",
@@ -383,14 +422,29 @@ function buildActivityLog() {
         hour: "2-digit",
         minute: "2-digit",
       });
+      const catBadge = e.category 
+        ? `<span class="cat-pill" style="height:4px; width:4px; border-radius:50%; background:${getCategoryColor(e.category)}; display:inline-block; margin-right:4px;"></span>`
+        : "";
       return `<div class="activity-item">
       <div class="activity-user" style="font-weight:600">${e.user}</div>
-      <div class="activity-action" style="font-size:0.9em;color:var(--text-muted)">${e.activity}</div>
+      <div class="activity-action" style="font-size:0.9em;color:var(--text-muted)">${catBadge}${e.activity}</div>
       <div class="activity-time">${timeStr}</div>
       <div class="activity-status"><span class="status-pill ${e.statusCls}"></span>${e.statusTxt}</div>
     </div>`;
     })
     .join("");
+}
+
+function getCategoryColor(cat) {
+  const map = {
+    residential:    "#0ea5e9",
+    industrial:     "#64748b",
+    agricultural:   "#f59e0b",
+    commercial:     "#f97316",
+    street_lighting: "#06b6d4",
+    other:          "#22c55e"
+  };
+  return map[cat.toLowerCase().replace(" ", "_")] || "#64748b";
 }
 
 // ── Chart Switcher ───────────────────────────────────────────────
@@ -711,25 +765,43 @@ function renderCategoryBreakdown() {
     _categoryChart = null;
   }
 
-  const counts = {};
+  const counts = {
+    Industrial: 0,
+    Agricultural: 0,
+    Commercial: 0,
+    Residential: 0,
+    "Street Lighting": 0,
+    Other: 0
+  };
+
   allPredictions.forEach((p) => {
     const user = allUsers.find(u => String(u.id) === String(p.user_id || p.userId));
     let cat = (p.category || user?.category || "Industrial").trim();
-    cat = cat.charAt(0).toUpperCase() + cat.slice(1).toLowerCase();
-    counts[cat] = (counts[cat] || 0) + 1;
+    // Normalize case
+    const match = Object.keys(counts).find(k => k.toLowerCase() === cat.toLowerCase());
+    if (match) counts[match]++;
+    else counts.Other++;
   });
 
-  if (Object.keys(counts).length === 0) counts["Industrial"] = 1;
-
-  const palette = ["#f59e0b", "#22c55e", "#0ea5e9", "#f43f5e", "#a855f7", "#ec4899"];
+  const labels = Object.keys(counts);
+  const dataValues = Object.values(counts);
+  const colorMap = {
+    Industrial: "#64748b",
+    Agricultural: "#f59e0b",
+    Commercial: "#f97316",
+    Residential: "#0ea5e9",
+    "Street Lighting": "#06b6d4",
+    Other: "#22c55e"
+  };
+  const colors = labels.map(l => colorMap[l]);
 
   _categoryChart = new Chart(canvas, {
     type: "doughnut",
     data: {
-      labels: Object.keys(counts),
+      labels: labels,
       datasets: [{
-        data: Object.values(counts),
-        backgroundColor: palette.slice(0, Object.keys(counts).length),
+        data: dataValues,
+        backgroundColor: colors,
         borderWidth: 0,
         hoverOffset: 12
       }]
@@ -756,8 +828,15 @@ function renderTrendLine() {
   const sorted = [...allPredictions].sort((a, b) => new Date(a.created_at || a.createdAt) - new Date(b.created_at || b.createdAt));
   const labels = Array.from(new Set(sorted.map(p => formatDateLabel(p)))).filter(l => l !== "Unknown");
 
-  const categories = ["Industrial", "Agricultural", "Commercial", "Residential"];
-  const colorMap = { Industrial: "#f59e0b", Agricultural: "#22c55e", Commercial: "#0ea5e9", Residential: "#f43f5e" };
+  const categories = ["Industrial", "Agricultural", "Commercial", "Residential", "Street Lighting", "Other"];
+  const colorMap = {
+    Industrial: "#64748b",
+    Agricultural: "#f59e0b",
+    Commercial: "#f97316",
+    Residential: "#0ea5e9",
+    "Street Lighting": "#06b6d4",
+    Other: "#22c55e"
+  };
 
   const datasets = categories.map((cat) => {
     const data = labels.map((l) => {
@@ -902,7 +981,7 @@ function displayUsers() {
   if (!tbody) return;
 
   if (allUsers.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:32px">No users found.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:32px">No users found.</td></tr>`;
     return;
   }
 
@@ -919,12 +998,14 @@ function displayUsers() {
         ? `<span class="status-badge info" style="background:rgba(0,212,255,0.15); color:var(--electric)">Admin</span>`
         : `<span class="status-badge success" style="background:rgba(0,208,132,0.15); color:#00d084">User</span>`;
 
-      // Role action toggle
-      const roleAction = u.isAdmin
-        ? `<button class="btn-sm" style="background:rgba(255,71,87,0.1); color:#ff4757; border:none;" onclick="removeAdmin('${u.id}')">Demote</button>`
-        : `<button class="btn-sm btn-edit" onclick="makeAdmin('${u.id}')">Promote</button>`;
+      const avatar = u.profile_pic || "/static/images/default-avatar.png";
 
       return `<tr>
+        <td>
+          <div class="user-avatar-small" style="width:28px; height:28px; border-width:1.5px;">
+            <img src="${avatar}" alt="Avatar" />
+          </div>
+        </td>
         <td style="font-weight:600">${u.fullname}</td>
         <td style="color:var(--text-muted)">${u.email}</td>
         <td>${u.organization || "—"}</td>
@@ -1002,7 +1083,14 @@ function displayPredictions() {
       const g = p.growth_pct || 0;
       const gClr = g >= 0 ? "var(--success)" : "var(--danger)";
       const gTxt = (g > 0 ? "+" : "") + g + "%";
+      const avatar = user?.profile_pic || "/static/images/default-avatar.png";
+
       return `<tr>
+      <td>
+        <div class="user-avatar-small" style="width:28px; height:28px; border-width:1.5px;">
+          <img src="${avatar}" alt="Avatar" />
+        </div>
+      </td>
       <td style="font-weight:600">${name}</td>
       <td>${p.company_name || p.companyName || "—"}</td>
       <td>${p.city || "—"}</td>
@@ -1029,14 +1117,22 @@ function viewUser(userId) {
 
   selectedUserId = userId;
   const preds = allPredictions.filter((p) => p.userId === user.id);
+  const avatar = user.profile_pic || "/static/images/default-avatar.png";
 
   document.getElementById("modalTitle").textContent = "User Details";
   document.getElementById("modalBody").innerHTML = `
-    <p><strong>Name</strong> ${user.fullname}</p>
-    <p><strong>Email</strong> ${user.email}</p>
+    <div style="display:flex; align-items:center; gap:15px; margin-bottom:20px; padding-bottom:15px; border-bottom:1px solid var(--border);">
+      <div class="user-avatar-small" style="width:50px; height:50px; border-width:2px;">
+         <img src="${avatar}" alt="User Avatar" />
+      </div>
+      <div>
+         <h4 style="margin:0; font-size:1.1em; color:var(--text)">${user.fullname}</h4>
+         <p style="margin:0; font-size:0.85em; color:var(--text-muted)">${user.email}</p>
+      </div>
+    </div>
     <p><strong>Organization</strong> ${user.organization || "—"}</p>
     <p><strong>City</strong> ${user.city || "—"}</p>
-    <p><strong>Category</strong> ${user.category || "—"}</p>
+    <p><strong>Category</strong> <span style="color:${getCategoryColor(user.category || "Other")};font-weight:600">${user.category || "—"}</span></p>
     <p><strong>Joined</strong> ${user.created_at ? new Date(user.created_at).toLocaleDateString() : "—"}</p>
     <p><strong>Last Login</strong> ${user.last_login ? new Date(user.last_login).toLocaleString() : "—"}</p>
     <p><strong>Role</strong> <span style="color:var(--electric);font-weight:700">${user.isAdmin ? "Admin" : "User"}</span></p>
@@ -1053,12 +1149,22 @@ function viewPrediction(predId) {
 
   const user = allUsers.find((u) => u.id === (p.user_id || p.userId));
   const name = p.user_fullname || user?.fullname || "Unknown";
+  const avatar = user?.profile_pic || "/static/images/default-avatar.png";
   const g = p.growth_pct || 0;
 
   document.getElementById("modalTitle").textContent = "Prediction Details";
   document.getElementById("modalBody").innerHTML = `
-    <p><strong>User</strong> ${name}</p>
+    <div style="display:flex; align-items:center; gap:15px; margin-bottom:20px; padding-bottom:15px; border-bottom:1px solid var(--border);">
+      <div class="user-avatar-small" style="width:50px; height:50px; border-width:2px;">
+         <img src="${avatar}" alt="User Avatar" />
+      </div>
+      <div>
+         <h4 style="margin:0; font-size:1.1em; color:var(--text)">${name}</h4>
+         <p style="margin:0; font-size:0.85em; color:var(--text-muted)">Prediction Owner</p>
+      </div>
+    </div>
     <p><strong>Company</strong> ${p.company_name || p.companyName || "—"}</p>
+    <p><strong>Category</strong> <span style="color:${getCategoryColor(p.category || "Other")};font-weight:600">${p.category || "—"}</span></p>
     <p><strong>City</strong> ${p.city || "—"}</p>
     <p><strong>Next Week</strong> ${(p.week_val || 0).toFixed(2)} kWh</p>
     <p><strong>Next Month</strong> ${(p.month_val || 0).toFixed(2)} kWh</p>

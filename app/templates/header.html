@@ -94,6 +94,9 @@
     <div class="header-actions">
       <!-- Profile trigger (shown when logged in) -->
       <div class="user-profile-trigger" id="userEmail" title="View profile">
+        <div class="user-avatar-small">
+          <img id="headerAvatar" src="/static/images/default-avatar.png" alt="Avatar" />
+        </div>
         <span id="userFirstName">—</span>
         <svg
           width="10"
@@ -151,6 +154,13 @@
     <div id="profilePopup" class="profile-popup" style="display: none">
       <div class="profile-popup-content">
         <div class="profile-header">
+          <div class="profile-avatar-container">
+            <img id="popupAvatar" src="/static/images/default-avatar.png" alt="Profile" />
+            <label for="avatarUpload" class="avatar-edit-label" title="Change Photo">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+            </label>
+            <input type="file" id="avatarUpload" accept="image/*" style="display: none" />
+          </div>
           <h3 id="profileName">User</h3>
           <button class="close-popup">&times;</button>
         </div>

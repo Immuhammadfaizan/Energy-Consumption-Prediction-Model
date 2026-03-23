@@ -11,6 +11,7 @@
 
 let liveChart = null;
 let donutChart = null;
+let generationChart = null;
 
 // ───────────────────────────────────────────────────────────────
 //  UTILITIES
@@ -218,14 +219,36 @@ function renderDonutChart(predictions) {
   if (!canvas || !window.Chart) return;
   if (donutChart) donutChart.destroy();
 
-  const counts = {};
+  const colorMap = {
+    residential:    "#0ea5e9", // Blue
+    industrial:     "#64748b", // Grey
+    agricultural:   "#f59e0b", // Gold
+    commercial:     "#f97316", // Orange
+    street_lighting: "#06b6d4", // Cyan
+    other:          "#22c55e"  // Green
+  };
+
+  const counts = {
+    residential: 0,
+    industrial: 0,
+    agricultural: 0,
+    commercial: 0,
+    street_lighting: 0,
+    other: 0
+  };
+
   predictions.forEach((p) => {
-    const cat = p.category || "General";
-    counts[cat] = (counts[cat] || 0) + 1;
+    const cat = (p.category || "other").toLowerCase();
+    if (counts.hasOwnProperty(cat)) {
+       counts[cat]++;
+    } else {
+       counts.other++;
+    }
   });
 
-  const labels = Object.keys(counts);
-  const data = Object.values(counts);
+  const labels = ["Residential", "Industrial", "Agricultural", "Commercial", "Street Lighting", "Other"];
+  const data = labels.map(l => counts[l.toLowerCase().replace(" ", "_")]);
+  const colors = labels.map(l => colorMap[l.toLowerCase().replace(" ", "_")]);
 
   donutChart = new Chart(canvas, {
     type: "doughnut",
@@ -234,15 +257,9 @@ function renderDonutChart(predictions) {
       datasets: [
         {
           data,
-          backgroundColor: [
-            "#00d4ff",
-            "#00d084",
-            "#ff006e",
-            "#a29bfe",
-            "#ffa502",
-          ],
+          backgroundColor: colors,
           borderWidth: 0,
-          hoverOffset: 12,
+          hoverOffset: 15,
         },
       ],
     },
@@ -251,11 +268,48 @@ function renderDonutChart(predictions) {
       maintainAspectRatio: false,
       plugins: {
         legend: {
-          position: "bottom",
-          labels: { color: "#e0e0e0", padding: 20, font: { size: 11 } },
+          position: "right",
+          labels: { color: "#e0e0e0", padding: 15, font: { size: 11 } },
         },
       },
-      cutout: "70%",
+      cutout: "65%",
+    },
+  });
+}
+
+function renderGenerationChart() {
+  const canvas = document.getElementById("generationChart");
+  if (!canvas || !window.Chart) return;
+  if (generationChart) generationChart.destroy();
+
+  // Data from user's image reference
+  const labels = ["Thermal", "Hydroelectric", "Nuclear", "Renewable"];
+  const data = [62, 26, 8, 4];
+  const colors = ["#475569", "#00d4ff", "#ff4757", "#00d084"];
+
+  generationChart = new Chart(canvas, {
+    type: "doughnut",
+    data: {
+      labels,
+      datasets: [
+        {
+          data,
+          backgroundColor: colors,
+          borderWidth: 0,
+          hoverOffset: 15,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: "right",
+          labels: { color: "#e0e0e0", padding: 15, font: { size: 11 } },
+        },
+      },
+      cutout: "65%",
     },
   });
 }
@@ -275,14 +329,22 @@ function renderCategoryBreakdown(predictions) {
   container.innerHTML = Object.entries(groups)
     .map(([name, data]) => {
       const avg = data.totalWk / data.count;
-      const icon =
-        name.toLowerCase() === "industrial"
-          ? `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><circle cx="12" cy="14" r="4"></circle><line x1="12" y1="6" x2="12.01" y2="6"></line></svg>`
-          : name.toLowerCase() === "commercial"
-            ? `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><path d="M9 22v-4h6v4"></path><path d="M8 6h.01"></path><path d="M16 6h.01"></path><path d="M12 6h.01"></path><path d="M12 10h.01"></path><path d="M12 14h.01"></path><path d="M16 10h.01"></path><path d="M16 14h.01"></path><path d="M8 10h.01"></path><path d="M8 14h.01"></path></svg>`
-            : name.toLowerCase() === "residential"
-              ? `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>`
-              : `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`;
+      const lowerName = name.toLowerCase().replace(" ", "_");
+      
+      let icon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`;
+      
+      if (lowerName === "industrial") {
+          icon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><circle cx="12" cy="14" r="4"></circle><line x1="12" y1="6" x2="12.01" y2="6"></line></svg>`;
+      } else if (lowerName === "commercial") {
+          icon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><path d="M9 22v-4h6v4"></path><path d="M8 6h.01"></path><path d="M16 6h.01"></path><path d="M12 6h.01"></path></svg>`;
+      } else if (lowerName === "residential") {
+          icon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>`;
+      } else if (lowerName === "agricultural") {
+          icon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>`;
+      } else if (lowerName === "street_lighting") {
+          icon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"></path><path d="m4.93 4.93 2.83 2.83"></path><path d="M2 12h4"></path><path d="M12 18v4"></path><path d="M4.93 19.07 7.76 16.24"></path><path d="M22 12h-4"></path><path d="M19.07 4.93 16.24 7.76"></path></svg>`;
+      }
+
       return `
       <div class="card cat-card">
         <div class="cat-header">
@@ -406,6 +468,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       renderModernSummary(predictions);
       renderTrendChart(predictions);
       renderDonutChart(predictions);
+      renderGenerationChart();
       renderCategoryBreakdown(predictions);
       renderTable(predictions);
     }
