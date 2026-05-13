@@ -29,8 +29,11 @@ def create_app(config_class='app.config.Config'):
 
     # Create tables if they don't exist
     with app.app_context():
+        import time
+        start_time = time.time()
         try:
             db.create_all()
+            app.logger.info(f"Database sync completed in {time.time() - start_time:.2f}s")
         except Exception as e:
             print(f"Failed to create tables (DB might not be ready yet): {e}")
 

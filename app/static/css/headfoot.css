@@ -7,11 +7,16 @@
   --bg: #090d1a;
   --bg2: #0d1220;
   --bg3: #111827;
+  --dark-bg: var(--bg);
+  --darker-bg: var(--bg2);
+  --sidebar-bg: var(--bg2);
   --card-bg: #131929;
   --card-border: rgba(255, 255, 255, 0.06);
   --header-bg: rgba(9, 13, 26, 0.97);
   --text: #e2e8f0;
-  --text-muted: #64748b;
+  --text-light: var(--text);
+  --text-gray: #64748b;
+  --text-muted: var(--text-gray);
   --border: rgba(255, 255, 255, 0.07);
   --electric: #00d4ff;
   --accent: #ff006e;
@@ -680,10 +685,10 @@ tbody tr:last-child td {
   border-color: rgba(0, 0, 0, 0.08);
 }
 
-/* ── SHARED UTILS (Buttons & Animations) ────────────────────── */
+/* ── SHARED UTILS (Buttons & Animations) */
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--electric), #0077ff);
+  background: linear-gradient(135deg, #0077ff);
   color: #ffffff !important;
   padding: 10px 20px;
   border: none;
@@ -858,7 +863,6 @@ tbody tr:last-child td {
   border: 1.5px solid var(--electric);
   object-fit: cover;
 }
-
 
 /* ── RESPONSIVE ─────────────────────────────────────────────── */
 @media (max-width: 1024px) {

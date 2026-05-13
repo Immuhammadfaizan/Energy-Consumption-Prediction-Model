@@ -26,8 +26,4 @@ def about():
 @main_bp.route('/admin')
 @login_required
 def admin():
-    user = User.query.get(session.get('user_id'))
-    if not user or not user.is_admin:
-        flash("Unauthorized: Admin access required.", "error")
-        return redirect(url_for('main.index'))
     return render_template('admin.html')

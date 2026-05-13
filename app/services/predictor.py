@@ -308,8 +308,11 @@ def run_prediction(week_kwh: float, month_kwh: float, year_kwh: float,
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
 
+    # n_jobs=1 is intentional: n_jobs=-1 uses multiprocessing which writes .pyc
+    # cache files into Python's stdlib, causing watchdog to restart the server
+    # mid-prediction (the root cause of 'Failed to fetch').
     rf_params = dict(n_estimators=100, max_depth=8, min_samples_split=5,
-                     random_state=42, n_jobs=-1)
+                     random_state=42, n_jobs=1)
 
     rf_w = RandomForestRegressor(**rf_params).fit(X_scaled, y_week)
     rf_m = RandomForestRegressor(**rf_params).fit(X_scaled, y_month)
@@ -344,6 +347,7 @@ def run_prediction(week_kwh: float, month_kwh: float, year_kwh: float,
     daily_forecasts = []
     temp_max = weather.get("avg_temp_max", weather["temperature"] + 3)
     temp_min = weather.get("avg_temp_min", weather["temperature"] - 5)
+    
     for d in range(7):
         day_temp = temp_min + (temp_max - temp_min) * (0.3 + 0.7 * np.random.rand())
         x_day = scaler.transform([[

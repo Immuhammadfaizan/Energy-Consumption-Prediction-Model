@@ -1,291 +1,236 @@
-// Auth.js - Handle login and signup functionality
-
+// Auth.js - Unified Authentication & UI Bridge for FLUX
 class AuthManager {
   constructor() {
     this.currentUser = JSON.parse(localStorage.getItem("currentUser")) || null;
-    this.users = JSON.parse(localStorage.getItem("users")) || [];
-
-    // Ensure at least one admin exists (first user should be admin)
-    if (this.users.length > 0 && !this.users.some((u) => u.isAdmin)) {
-      this.users[0].isAdmin = true;
-      localStorage.setItem("users", JSON.stringify(this.users));
-    }
   }
 
-  // Validate email format
-  validateEmail(email) {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
-  }
+  // Common utilities
+  validateEmail(email) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); }
+  validatePassword(password) { return password.length >= 6; }
+  isLoggedIn() { return this.currentUser !== null; }
+  getCurrentUser() { return this.currentUser; }
+  isAdmin() { return this.currentUser && this.currentUser.isAdmin; }
 
-  // Validate password strength
-  validatePassword(password) {
-    return password.length >= 6;
-  }
-
-  // Login user
-  login(email, password) {
-    const user = this.users.find(
-      (u) => u.email === email && u.password === password,
-    );
-
-    if (user) {
-      user.lastLogin = new Date().toISOString();
-
-      // Ensure first user is always admin
-      if (!this.users.some((u) => u.isAdmin)) {
-        user.isAdmin = true;
-      }
-
-      localStorage.setItem("users", JSON.stringify(this.users));
-      localStorage.setItem("currentUser", JSON.stringify(user));
-      this.currentUser = user;
-      return { success: true, user };
-    }
-
-    return { success: false, message: "Invalid email or password" };
-  }
-
-  // Sign up user
-  signup(userData) {
-    const existingUser = this.users.find((u) => u.email === userData.email);
-
-    if (existingUser) {
-      return { success: false, message: "Email already registered" };
-    }
-
-    // Make the first user an admin
-    const isFirstUser = this.users.length === 0;
-
-    const newUser = {
-      id: Date.now(),
-      ...userData,
-      isAdmin: isFirstUser, // First user is automatically admin
-      createdAt: new Date().toISOString(),
-      lastLogin: null,
-    };
-
-    this.users.push(newUser);
-    localStorage.setItem("users", JSON.stringify(this.users));
-    // DO NOT set currentUser on signup - let them login instead
-    return { success: true, user: newUser };
-  }
-
-  // Logout user
   logout() {
     localStorage.removeItem("currentUser");
     this.currentUser = null;
     window.location.href = "/auth/logout";
   }
-
-  // Check if user is logged in
-  isLoggedIn() {
-    return this.currentUser !== null;
-  }
-
-  // Get current user
-  getCurrentUser() {
-    return this.currentUser;
-  }
-
-  // Make user admin
-  makeAdmin(userId) {
-    const user = this.users.find((u) => u.id === userId);
-    if (user) {
-      user.isAdmin = true;
-      localStorage.setItem("users", JSON.stringify(this.users));
-      return true;
-    }
-    return false;
-  }
-
-  // Check if current user is admin
-  isAdmin() {
-    return this.currentUser && this.currentUser.isAdmin;
-  }
 }
 
 const auth = new AuthManager();
 
-// Handle login form
-if (document.getElementById("loginForm")) {
-  document.getElementById("loginForm").addEventListener("submit", function (e) {
-    e.preventDefault();
+// ── GLOBAL UI UPDATER ───────────────────────────────────────────
+function updateGlobalAuthUI() {
+  const user = auth.getCurrentUser() || window.currentUser;
+  const els = {
+    userEmail: document.getElementById("userEmailIndicator"), // No longer overwriting the trigger element
+    userFirstName: document.getElementById("userFirstName"),
+    authBtn: document.getElementById("authBtn"),
+    logoutBtnHeader: document.getElementById("logoutBtnHeader"),
+    logoutBtn: document.getElementById("logoutBtn"),
+    adminLink: document.getElementById("adminLink"),
+    adminSide: document.getElementById("adminSidebarItem"),
+    userTrigger: document.getElementById("userProfileTrigger"),
+    userName: document.getElementById("headerUserName"),
+    headerAv: document.getElementById("headerAvatar"),
+    popupAv: document.getElementById("popupAvatar"),
+    footerAv: document.getElementById("footerAvatar"),
+    footerWrap: document.getElementById("footerUserWrap"),
+    footerName: document.getElementById("footerUserName"),
+    pName: document.getElementById("profileName"),
+    pEmail: document.getElementById("profileEmail"),
+    pOrg: document.getElementById("profileOrg"),
+    pCity: document.getElementById("profileCity"),
+    pRole: document.getElementById("profileRole")
+  };
 
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value;
+  if (user) {
+    const firstName = user.fullname ? user.fullname.split(" ")[0] : "User";
+    const isAdmin = user.isAdmin || user.is_admin === 1 || user.is_admin === true;
+    const picBase = user.profile_pic || "/static/images/default-avatar.png";
+    // Cache-bust only user-uploaded pics so the browser re-fetches after upload
+    const av = user._picTs ? `${picBase}?t=${user._picTs}` : picBase;
+    
+    if (els.userFirstName) els.userFirstName.textContent = firstName;
+    // Don't overwrite trigger content with raw email
+    if (els.userName) els.userName.textContent = firstName;
+    
+    if (els.authBtn) els.authBtn.style.display = "none";
+    if (els.logoutBtnHeader) els.logoutBtnHeader.style.display = "block";
+    if (els.logoutBtn) els.logoutBtn.style.display = "block";
+    if (els.userTrigger) els.userTrigger.style.display = "flex";
 
-    // Clear previous errors
-    document.getElementById("emailError").textContent = "";
-    document.getElementById("passwordError").textContent = "";
-
-    let hasError = false;
-
-    // Validation
-    if (!email) {
-      document.getElementById("emailError").textContent = "Email is required";
-      hasError = true;
-    } else if (!auth.validateEmail(email)) {
-      document.getElementById("emailError").textContent =
-        "Please enter a valid email";
-      hasError = true;
+    if (isAdmin) {
+      if (els.adminLink) els.adminLink.style.display = "block";
+      if (els.adminSide) els.adminSide.style.display = "block";
     }
 
-    if (!password) {
-      document.getElementById("passwordError").textContent =
-        "Password is required";
-      hasError = true;
-    }
+    // Profile Popup & Avatars
+    if (els.pName) els.pName.textContent = user.fullname || "User";
+    if (els.pEmail) els.pEmail.textContent = user.email || "—";
+    if (els.pOrg) els.pOrg.textContent = user.organization || "—";
+    if (els.pCity) els.pCity.textContent = user.city || "—";
+    if (els.pRole) els.pRole.textContent = isAdmin ? "Administrator" : "User";
 
-    if (hasError) return;
+    if (els.headerAv) els.headerAv.src = av;
+    if (els.popupAv) els.popupAv.src = av;
+    if (els.footerAv) els.footerAv.src = av;
+    if (els.footerWrap) els.footerWrap.style.display = "flex";
+    if (els.footerName) els.footerName.textContent = user.fullname || user.email;
 
-    // Submit the form to the backend natively
-    document.getElementById("loginForm").submit();
+  } else {
+    if (els.authBtn) els.authBtn.style.display = "block";
+    if (els.logoutBtnHeader) els.logoutBtnHeader.style.display = "none";
+    if (els.logoutBtn) els.logoutBtn.style.display = "none";
+    if (els.adminLink) els.adminLink.style.display = "none";
+    if (els.adminSide) els.adminSide.style.display = "none";
+    if (els.userTrigger) els.userTrigger.style.display = "none";
+    if (els.footerWrap) els.footerWrap.style.display = "none";
+  }
+
+  setupProfilePopup();
+}
+
+function setupProfilePopup() {
+  const trigger = document.getElementById("userProfileTrigger");
+  const popup = document.getElementById("profilePopup");
+  const closeBtn = document.querySelector(".close-popup");
+
+  if (!popup || !trigger) return;
+
+  // Cleanup old listeners to prevent leaks
+  const newTrigger = trigger.cloneNode(true);
+  trigger.parentNode.replaceChild(newTrigger, trigger);
+
+  newTrigger.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const isHidden = window.getComputedStyle(popup).display === "none";
+    popup.style.display = isHidden ? "block" : "none";
   });
+
+  if (closeBtn) {
+    closeBtn.onclick = () => popup.style.display = "none";
+  }
+
+  document.onclick = (e) => {
+    if (popup.style.display === "block" && !popup.contains(e.target) && !newTrigger.contains(e.target)) {
+      popup.style.display = "none";
+    }
+  };
+
+  // Avatar Upload
+  const upload = document.getElementById("avatarUpload");
+  if (upload) {
+    upload.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const formData = new FormData();
+      formData.append("file", file);
+      try {
+        const res = await fetch("/api/profile/upload", { method: "POST", body: formData });
+        const data = await res.json();
+        if (data.success) {
+          const ts = Date.now();
+          if (window.currentUser) {
+            window.currentUser.profile_pic = data.profile_pic;
+            window.currentUser._picTs = ts;
+          }
+          auth.currentUser.profile_pic = data.profile_pic;
+          auth.currentUser._picTs = ts;
+          localStorage.setItem("currentUser", JSON.stringify(auth.currentUser));
+          updateGlobalAuthUI();
+          // Show feedback
+          const popupAv = document.getElementById("popupAvatar");
+          if (popupAv) popupAv.style.outline = "3px solid #00d084";
+          setTimeout(() => { if (popupAv) popupAv.style.outline = ""; }, 2000);
+        } else {
+          console.error("Upload error:", data.error);
+        }
+      } catch (err) { console.error("Upload failed", err); }
+    };
+  }
 }
 
-// Handle signup form
-if (document.getElementById("signupForm")) {
-  document
-    .getElementById("signupForm")
-    .addEventListener("submit", function (e) {
-      e.preventDefault();
-
-      const fullname = document.getElementById("fullname").value.trim();
-      const email = document.getElementById("email").value.trim();
-      const organization = document.getElementById("organization").value.trim();
-      const password = document.getElementById("password").value;
-      const confirmPassword = document.getElementById("confirmPassword").value;
-      const city = document.getElementById("city").value;
-      const category = document.getElementById("category").value;
-      const terms = document.getElementById("terms").checked;
-
-      // Clear previous errors
-      document.getElementById("fullnameError").textContent = "";
-      document.getElementById("emailError").textContent = "";
-      document.getElementById("organizationError").textContent = "";
-      document.getElementById("passwordError").textContent = "";
-      document.getElementById("confirmPasswordError").textContent = "";
-      document.getElementById("cityError").textContent = "";
-      document.getElementById("categoryError").textContent = "";
-      document.getElementById("termsError").textContent = "";
-
-      let hasError = false;
-
-      // Validation
-      if (!fullname) {
-        document.getElementById("fullnameError").textContent =
-          "Full name is required";
-        hasError = true;
-      } else if (fullname.length < 3) {
-        document.getElementById("fullnameError").textContent =
-          "Name must be at least 3 characters";
-        hasError = true;
-      }
-
-      if (!email) {
-        document.getElementById("emailError").textContent = "Email is required";
-        hasError = true;
-      } else if (!auth.validateEmail(email)) {
-        document.getElementById("emailError").textContent =
-          "Please enter a valid email";
-        hasError = true;
-      }
-
-      if (!organization) {
-        document.getElementById("organizationError").textContent =
-          "Organization name is required";
-        hasError = true;
-      }
-
-      if (!password) {
-        document.getElementById("passwordError").textContent =
-          "Password is required";
-        hasError = true;
-      } else if (!auth.validatePassword(password)) {
-        document.getElementById("passwordError").textContent =
-          "Password must be at least 6 characters";
-        hasError = true;
-      }
-
-      if (!confirmPassword) {
-        document.getElementById("confirmPasswordError").textContent =
-          "Please confirm your password";
-        hasError = true;
-      } else if (password !== confirmPassword) {
-        document.getElementById("confirmPasswordError").textContent =
-          "Passwords do not match";
-        hasError = true;
-      }
-
-      if (!city) {
-        document.getElementById("cityError").textContent =
-          "Please select a city";
-        hasError = true;
-      }
-
-      if (!category) {
-        document.getElementById("categoryError").textContent =
-          "Please select a category";
-        hasError = true;
-      }
-
-      if (!terms) {
-        document.getElementById("termsError").textContent =
-          "You must agree to the terms";
-        hasError = true;
-      }
-
-      if (hasError) return;
-
-      // Submit the form natively
-      document.getElementById("signupForm").submit();
-    });
-}
-
-// Show alert message
+// ── GLOBAL ALERT ───────────────────────────────────────────────
 function showAlert(message, type = "info") {
-  const container = document.getElementById("alertContainer");
-  if (!container) return;
+  const container = document.getElementById("alertContainer") || document.getElementById("predAlertContainer");
+  if (!container) {
+    console.warn("No alert container found:", message);
+    return;
+  }
 
   const alert = document.createElement("div");
-  alert.className = `alert alert-${type}`;
+  alert.className = `alert alert-${type} pred-alert pred-alert-${type}`;
   alert.textContent = message;
 
   container.innerHTML = "";
   container.appendChild(alert);
 
-  // Auto-dismiss after 5 seconds
-  setTimeout(() => {
-    alert.remove();
-  }, 5000);
+  setTimeout(() => alert.classList.add('fade-out'), 4500);
+  setTimeout(() => alert.remove(), 5000);
 }
 
-// Redirect to appropriate page if already logged in
-window.addEventListener("DOMContentLoaded", function () {
-  const currentPage = window.location.pathname;
+// ── INIT ────────────────────────────────────────────────────────
+window.addEventListener("DOMContentLoaded", () => {
+  updateGlobalAuthUI();
 
-  // Development bypass: prevent jumping out of admin page automatically
-  // Let admin.js auto-provision an admin user.
-  if (currentPage.includes("admin.html")) {
-    return;
+  // Sync across tabs: if user updates profile in another tab, refresh UI here
+  window.addEventListener("storage", (e) => {
+    if (e.key === "currentUser") {
+      try {
+        const newData = JSON.parse(e.newValue);
+        auth.currentUser = newData;
+        if (window.currentUser) window.currentUser = auth.currentUser;
+        updateGlobalAuthUI();
+      } catch (_) {}
+    }
+  });
+
+  // Handle Logout Buttons
+  const logoutBtns = ["logoutBtn", "logoutBtnHeader", "profileLogoutBtn"];
+  logoutBtns.forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        auth.logout();
+      });
+    }
+  });
+
+  // Handle Login/Signup Forms if present
+  const loginForm = document.getElementById("loginForm");
+  const signupForm = document.getElementById("signupForm");
+
+  if (loginForm) {
+    loginForm.onsubmit = (e) => {
+      const email = document.getElementById("email").value.trim();
+      const pass = document.getElementById("password").value;
+      if (!auth.validateEmail(email) || !pass) {
+        e.preventDefault();
+        showAlert("Please enter a valid email and password.", "error");
+      }
+    };
   }
 
-  if (auth.isLoggedIn()) {
-    // If on login or signup page, redirect to index.html for all users
-    if (
-      currentPage.includes("login.html") ||
-      currentPage.includes("signup.html")
-    ) {
-      window.location.href = "/";
-    }
-  } else {
-    // If on protected pages, redirect to login
-    if (
-      currentPage.includes("prediction.html") ||
-      currentPage.includes("statistics.html")
-    ) {
-      window.location.href = "/auth/login";
-    }
+  if (signupForm) {
+    signupForm.onsubmit = (e) => {
+      const pass = document.getElementById("password").value;
+      const conf = document.getElementById("confirmPassword").value;
+      if (pass !== conf) {
+        e.preventDefault();
+        showAlert("Passwords do not match.", "error");
+      } else if (pass.length < 6) {
+        e.preventDefault();
+        showAlert("Password must be at least 6 characters.", "error");
+      }
+    };
+  }
+
+  // Redirect checks
+  const path = window.location.pathname;
+  if (!auth.isLoggedIn() && (path.includes("prediction") || path.includes("statistics"))) {
+    window.location.href = "/auth/login";
   }
 });

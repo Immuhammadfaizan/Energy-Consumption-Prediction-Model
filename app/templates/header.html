@@ -27,9 +27,11 @@
         >About</a
       >
     </li>
-    <li id="adminSidebarItem" style="display: none; margin-top: 8px">
+    {% if current_user and current_user.is_admin %}
+    <li id="adminSidebarItem" style="margin-top: 8px">
       <a href="/admin">Admin Panel</a>
     </li>
+    {% endif %}
     <li
       style="
         margin-top: 40px;
@@ -84,16 +86,18 @@
             >About</a
           >
         </li>
-        <li id="adminNavItem" style="display: none">
+        {% if current_user and current_user.is_admin %}
+        <li id="adminNavItem">
           <a href="/admin">Admin</a>
         </li>
+        {% endif %}
       </ul>
     </nav>
 
     <!-- Actions -->
     <div class="header-actions">
       <!-- Profile trigger (shown when logged in) -->
-      <div class="user-profile-trigger" id="userEmail" title="View profile">
+      <div class="user-profile-trigger" id="userProfileTrigger" title="View profile" style="display: none">
         <div class="user-avatar-small">
           <img id="headerAvatar" src="/static/images/default-avatar.png" alt="Avatar" />
         </div>

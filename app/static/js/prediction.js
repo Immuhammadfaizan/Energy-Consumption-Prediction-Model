@@ -135,9 +135,14 @@ async function runPrediction(e) {
   }
 
   try {
+    // Use AbortController so we handle long RF training gracefully (up to 120s)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 120000); // 2-min timeout
+
     const res = await fetch("/api/predict", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      signal: controller.signal,
       body: JSON.stringify({
         week_kwh: weekKwh,
         month_kwh: monthKwh,
@@ -147,6 +152,7 @@ async function runPrediction(e) {
         category,
       }),
     });
+    clearTimeout(timeoutId);
 
     const data = await res.json();
     hideLoader();
@@ -164,7 +170,17 @@ async function runPrediction(e) {
     loadHistory(); // Refresh history list after new successful prediction
   } catch (err) {
     hideLoader();
-    showAlert("Network error: " + err.message, "error");
+    if (err.name === 'AbortError') {
+      showAlert(
+        "Request timed out. The model is taking too long — please try again.",
+        "error"
+      );
+    } else {
+      showAlert(
+        "Network error: " + err.message + ". Make sure the server is running.",
+        "error"
+      );
+    }
   } finally {
     if (btn) {
       btn.disabled = false;
@@ -438,15 +454,7 @@ function switchChart(type) {
   if (lastResult) renderChart(lastResult.daily_forecasts, type);
 }
 
-// ═══════════════════════════════════════════════════════════════
-//  ALERT HELPER
-// ═══════════════════════════════════════════════════════════════
-function showAlert(msg, type = "error") {
-  const el = document.getElementById("alertContainer");
-  if (!el) return;
-  el.innerHTML = `<div class="pred-alert pred-alert-${type}">${msg}</div>`;
-  setTimeout(() => (el.innerHTML = ""), 5000);
-}
+// showAlert centralized in auth.js
 
 // ═══════════════════════════════════════════════════════════════
 //  HISTORY PANEL LOGIC

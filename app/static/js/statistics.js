@@ -1,478 +1,459 @@
 /**
- * statistics.js  — Energy Statistics Page
- *
+ * statistics.js - Advanced Energy Analytics Dashboard
+ * 
  * Features:
- *   - Fetches all historical predictions from /api/predictions
- *   - Modern summary grid with an animated "Live" card featuring a progress bar
- *   - "Waterfall" consumption trend bar chart (Exclusive to stats page)
- *   - Category distribution doughnut chart
- *   - Interactive table with historical data
+ * - Multi-metric Trend Analysis with Tab Switcher
+ * - Weighted Category Distribution (Doughnut)
+ * - Geographic Intensity Analysis (Horizontal Bar)
+ * - Real-time Data Sync & Cache-Busting
  */
 
-let liveChart = null;
-let donutChart = null;
-let generationChart = null;
+let charts = {
+  trend: null,
+  donut: null,
+  city: null
+};
 
-// ───────────────────────────────────────────────────────────────
-//  UTILITIES
-// ───────────────────────────────────────────────────────────────
-function animateNumber(el, target, suffix = " kWh", decimals = 2) {
-  if (!el) return;
-  const start = parseFloat(el.dataset.current || 0);
-  const duration = 1000;
-  const steps = 60;
-  const diff = target - start;
-  let step = 0;
-  el.dataset.current = target;
-  const timer = setInterval(() => {
-    step++;
-    const val = start + diff * (step / steps);
-    el.textContent = val.toFixed(decimals) + suffix;
-    if (step >= steps) clearInterval(timer);
-  }, duration / steps);
+let allPredictions = [];
+let currentPage = 1;
+const itemsPerPage = 10;
+let currentMetric = 'weekly';
+
+// ── UTILITIES ──────────────────────────────────────────────────
+
+function formatNumber(num) {
+  return new Intl.NumberFormat().format(num.toFixed(2));
 }
 
-// Component
-function renderModernSummary(predictions) {
-  const summaryGrid = document.getElementById("modernSummary");
-  if (!summaryGrid) return;
+function getMetricLabel(metric) {
+  const labels = {
+    weekly: 'Weekly Usage (kWh)',
+    monthly: 'Monthly Norm. (kWh)',
+    yearly: 'Yearly Norm. (kWh)'
+  };
+  return labels[metric] || 'Usage (kWh)';
+}
 
-  let totalWeekly = 0,
-    totalMonthly = 0,
-    totalYearly = 0;
-  predictions.forEach((p) => {
-    totalWeekly += (p.week_val || 0) / 1.05;
-    totalMonthly += (p.month_val || 0) / 1.03;
-    totalYearly += (p.year_val || 0) / 1.02;
+// ── DATA PROCESSING ───────────────────────────────────────────
+
+function calcEfficiencyScore(predictions) {
+  if (predictions.length < 2) return 85; // Baseline
+  const latest = predictions[0];
+  const avgWk = predictions.reduce((a, b) => a + (b.week_val || 0), 0) / predictions.length;
+  
+  // Factor 1: Load Consistency (40%)
+  const expectedMonthly = latest.week_val * 4.33;
+  const devMo = Math.abs(latest.month_val - expectedMonthly) / (expectedMonthly || 1);
+  const f1 = Math.max(0, 100 - (devMo * 100));
+
+  // Factor 2: Intensity vs History (60%)
+  const devHist = Math.abs(latest.week_val - avgWk) / (avgWk || 1);
+  const f2 = Math.max(0, 100 - (devHist * 50));
+
+  return Math.round((f1 * 0.4) + (f2 * 0.6));
+}
+
+function processCityData(predictions) {
+  const cities = {};
+  predictions.forEach(p => {
+    if (!cities[p.city]) cities[p.city] = { total: 0, count: 0 };
+    cities[p.city].total += p.week_val || 0;
+    cities[p.city].count++;
+  });
+  
+  return Object.entries(cities)
+    .map(([name, data]) => ({ name, avg: data.total / data.count }))
+    .sort((a, b) => b.avg - a.avg);
+}
+
+// ── CHART RENDERING ───────────────────────────────────────────
+
+function initTrendChart(predictions) {
+  const ctx = document.getElementById('trendChart')?.getContext('2d');
+  if (!ctx) return;
+
+  const recent = [...predictions].slice(0, 15).reverse();
+  const labels = recent.map(p => p.company_name || 'Entry');
+  
+  const datasets = [
+    {
+      label: 'Weekly Forecast',
+      data: recent.map(p => p.week_val),
+      backgroundColor: '#00d4ff',
+      borderRadius: 4,
+      hidden: false
+    },
+    {
+      label: 'Monthly Norm.',
+      data: recent.map(p => p.month_val / 4.33),
+      backgroundColor: '#00d084',
+      borderRadius: 4,
+      hidden: true
+    },
+    {
+      label: 'Yearly Norm.',
+      data: recent.map(p => p.year_val / 52.14),
+      backgroundColor: '#f59e0b',
+      borderRadius: 4,
+      hidden: true
+    }
+  ];
+
+  if (charts.trend) charts.trend.destroy();
+  
+  charts.trend = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      barPercentage: 0.6,
+      categoryPercentage: 0.8,
+      interaction: { mode: 'index', intersect: false },
+      hover: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { 
+          display: true, 
+          position: 'top', 
+          align: 'end',
+          labels: { 
+            color: '#94a3b8', 
+            usePointStyle: true,
+            pointStyle: 'circle',
+            padding: 20,
+            font: { size: 12, weight: '500' }
+          } 
+        },
+        tooltip: {
+          backgroundColor: 'rgba(30, 41, 59, 0.95)',
+          titleColor: '#00d4ff',
+          bodyColor: '#f1f5f9',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 1,
+          padding: 14,
+          cornerRadius: 10,
+          usePointStyle: true,
+          callbacks: {
+            label: (ctx) => ` ${ctx.dataset.label}: ${formatNumber(ctx.parsed.y)} kWh`
+          }
+        }
+      },
+      scales: {
+        y: { 
+          grid: { color: 'rgba(148, 163, 184, 0.05)', drawBorder: false }, 
+          ticks: { color: '#94a3b8', padding: 10 } 
+        },
+        x: { 
+          grid: { display: false }, 
+          ticks: { color: '#94a3b8', padding: 10 } 
+        }
+      },
+      animations: {
+        y: { duration: 2000, easing: 'easeOutQuart' }
+      }
+    }
+  });
+}
+
+function updateTrendMetric(metric) {
+  if (!charts.trend) return;
+  const ds = charts.trend.data.datasets;
+  
+  if (metric === 'all') {
+    ds.forEach(d => d.hidden = false);
+  } else {
+    ds[0].hidden = metric !== 'weekly';
+    ds[1].hidden = metric !== 'monthly';
+    ds[2].hidden = metric !== 'yearly';
+  }
+  charts.trend.update();
+}
+
+function initDonutChart(predictions) {
+  const ctx = document.getElementById('donutChart')?.getContext('2d');
+  if (!ctx) return;
+
+  const categories = {};
+  predictions.forEach(p => {
+    const cat = p.category || 'General';
+    if (!categories[cat]) categories[cat] = 0;
+    categories[cat] += p.week_val || 0;
   });
 
-  const n = predictions.length || 1;
-  const avgWk = totalWeekly / n;
-  const avgMo = totalMonthly / n;
-  const avgYr = totalYearly / n;
+  const labels = Object.keys(categories);
+  const data = Object.values(categories);
+  const colors = ['#0ea5e9', '#6366f1', '#f59e0b', '#00d084', '#ff4757', '#8b5cf6'];
 
-  // Latest prediction for LIVE card
-  const latest = predictions.length ? predictions[0] : null;
-  const latestWk = latest ? latest.week_val || 0 : 0;
-  const company = latest ? latest.company_name : "";
+  if (charts.donut) charts.donut.destroy();
 
-  // Organization-specific historical norm
-  let orgTotalWk = 0;
-  let orgCount = 0;
-  predictions.forEach((p) => {
-    if (p.company_name === company) {
-      orgTotalWk += p.week_val || 0;
-      orgCount++;
+  charts.donut = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: colors,
+        borderWidth: 0,
+        hoverOffset: 15
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '70%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1e293b',
+          padding: 12,
+          callbacks: {
+            label: (ctx) => ` ${ctx.label}: ${formatNumber(ctx.parsed)} kWh`
+          }
+        }
+      }
     }
   });
 
-  const orgAvgWk = orgCount > 0 ? orgTotalWk / orgCount : avgWk;
-  const loadRatio = orgAvgWk > 0 ? latestWk / orgAvgWk : 1;
-  const globalRatio = avgWk > 0 ? latestWk / avgWk : 1;
+  // Custom Legend
+  const legendDiv = document.getElementById('donutLegendExt');
+  if (legendDiv) {
+    legendDiv.innerHTML = labels.map((l, i) => `
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; font-size:0.85em;">
+        <span style="width:10px; height:10px; border-radius:50%; background:${colors[i%colors.length]}"></span>
+        <span style="color:var(--text-muted)">${l}</span>
+        <span style="margin-left:auto; font-weight:600; color:var(--text)">${((data[i] / data.reduce((a,b)=>a+b,0)) * 100).toFixed(1)}%</span>
+      </div>
+    `).join('');
+  }
+}
 
-  // Progress Bar Logic (Live vs Org Avg)
-  const loadPercentage = Math.min(100, Math.round(globalRatio * 100));
-  const loadColor =
-    loadRatio > 1.1 ? "#ff4757" : loadRatio > 0.9 ? "#00d4ff" : "#00d084";
+function initCityChart(predictions) {
+  const ctx = document.getElementById('cityChart')?.getContext('2d');
+  if (!ctx) return;
 
-  // Dynamic Efficiency Score based on historical month usage vs weekly prediction
-  let efficiencyScore = 85; // Baseline
-  if (latest && latest.week_val && latest.month_val) {
-      const expectedMonth = latest.week_val * 4.33;
-      const moRatio = latest.month_val / expectedMonth;
-      efficiencyScore = Math.max(0, Math.min(100, Math.round(100 - (moRatio - 0.9) * 50)));
+  const cities = processCityData(predictions);
+
+  if (charts.city) charts.city.destroy();
+
+  charts.city = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: cities.map(c => c.name),
+      datasets: [{
+        label: 'Avg Weekly Load',
+        data: cities.map(c => c.avg),
+        backgroundColor: '#6366f1',
+        borderRadius: 5,
+        indexAxis: 'y'
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(148, 163, 184, 0.1)' }, ticks: { color: '#94a3b8' } },
+        y: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+      }
+    }
+  });
+}
+
+// ── UI UPDATES ────────────────────────────────────────────────
+
+function updateStatsSummary(predictions) {
+  const latest = predictions[0] || {};
+  const total = predictions.length;
+  
+  const avgW = predictions.reduce((a, b) => a + (b.week_val || 0), 0) / (total || 1);
+  const avgM = predictions.reduce((a, b) => a + (b.month_val || 0), 0) / (total || 1);
+  const avgY = predictions.reduce((a, b) => a + (b.year_val || 0), 0) / (total || 1);
+
+  const efficiency = calcEfficiencyScore(predictions);
+  const loadRatio = avgW > 0 ? (latest.week_val || 0) / avgW : 1;
+  const loadPercentage = Math.min(100, Math.round(loadRatio * 100));
+
+  // Update DOM Elements
+  const els = {
+    total: document.getElementById('totalPredictions'),
+    avgW: document.getElementById('avgWeekly'),
+    avgM: document.getElementById('avgMonthly'),
+    avgY: document.getElementById('avgYearly'),
+    live: document.getElementById('liveWeekVal'),
+    eff: document.getElementById('efficiencyVal'),
+    effSub: document.getElementById('efficiencySub'),
+    liveBar: document.getElementById('liveGaugeFill')
+  };
+
+  if (els.total) els.total.textContent = total;
+  if (els.avgW) els.avgW.textContent = formatNumber(avgW) + ' kWh';
+  if (els.avgM) els.avgM.textContent = formatNumber(avgM) + ' kWh';
+  if (els.avgY) els.avgY.textContent = formatNumber(avgY) + ' kWh';
+  
+  if (els.live) {
+    els.live.textContent = formatNumber(latest.week_val || 0) + ' kWh';
+    els.live.style.color = loadRatio > 1.2 ? '#ff4757' : (loadRatio < 0.8 ? '#00d084' : '#00d4ff');
   }
 
-  summaryGrid.innerHTML = `
-    <!-- Card 1: Total -->
-    <div class="stat-card stat-card-blue">
-      <div class="stat-icon">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
-      </div>
-      <div class="stat-info">
-        <p class="stat-label">Total Predictions</p>
-        <p class="stat-value">${predictions.length}</p>
-        <p class="stat-sub">Lifetime analysis</p>
-      </div>
-    </div>
+  if (els.eff) {
+    els.eff.textContent = efficiency;
+    els.eff.style.color = efficiency > 80 ? '#00d084' : (efficiency > 50 ? '#f59e0b' : '#ff4757');
+  }
 
-    <!-- Card 2: Avg Weekly -->
-    <div class="stat-card stat-card-teal">
-      <div class="stat-icon">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-      </div>
-      <div class="stat-info">
-        <p class="stat-label">Avg Weekly Baseline</p>
-        <p class="stat-value" id="avgWeekly" data-current="0">—</p>
-        <p class="stat-sub">Historical average</p>
-      </div>
-    </div>
+  if (els.effSub) {
+    els.effSub.textContent = efficiency > 80 ? 'Optimized Performance' : (efficiency > 50 ? 'Stable Usage' : 'High Variance Detected');
+  }
 
-    <!-- Card 3: Avg Monthly -->
-    <div class="stat-card stat-card-green">
-      <div class="stat-icon">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><path d="M8 14h.01"></path><path d="M12 14h.01"></path><path d="M16 14h.01"></path><path d="M8 18h.01"></path><path d="M12 18h.01"></path><path d="M16 18h.01"></path></svg>
-      </div>
-      <div class="stat-info">
-        <p class="stat-label">Avg Monthly Baseline</p>
-        <p class="stat-value" id="avgMonthly" data-current="0">—</p>
-        <p class="stat-sub">Historical average</p>
-      </div>
-    </div>
-
-    <!-- Card 4: LIVE PREDICTION BAR -->
-    <div class="stat-card stat-card-live">
-      <div class="live-badge">LIVE</div>
-      <div class="stat-icon">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--electric)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-      </div>
-      <div class="stat-info">
-        <p class="stat-label">Current Predicted Load</p>
-        <p class="stat-value" id="liveWeekVal" data-current="0" style="color:var(--electric);">${latestWk.toFixed(2)} kWh</p>
-        <p class="stat-sub" style="margin-bottom:8px;">Ref: ${latest ? latest.company_name : "N/A"}</p>
-        
-        <!-- THE NEW BAR CONCEPT -->
-        <div class="live-gauge-wrap">
-          <div class="live-gauge-fill" style="width:${loadPercentage}%; background:${loadColor};"></div>
-        </div>
-        <div style="display:flex; justify-content:space-between; margin-top:5px; font-size:0.75em; color:var(--text-muted); font-weight:600;">
-          <span>Load Intensity</span>
-          <span>${loadPercentage}%</span>
-        </div>
-      </div>
-      <div class="live-pulse"></div>
-    </div>
-
-    <!-- Card 5: Avg Yearly -->
-    <div class="stat-card stat-card-purple">
-      <div class="stat-icon">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-      </div>
-      <div class="stat-info">
-        <p class="stat-label">Avg Yearly Baseline</p>
-        <p class="stat-value" id="avgYearly" data-current="0">—</p>
-        <p class="stat-sub">Historical average</p>
-      </div>
-    </div>
-
-    <!-- Card 6: Efficiency Score -->
-    <div class="stat-card stat-card-efficiency">
-      <div class="stat-icon">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
-      </div>
-      <div class="stat-info">
-        <p class="stat-label">Energy Efficiency Score</p>
-        <p class="stat-value" id="efficiencyVal">${efficiencyScore}<span style="font-size:0.55em; color:var(--text-muted);">/100</span></p>
-        <p class="stat-sub">${loadRatio < 0.95 ? "Optimized" : loadRatio < 1.05 ? "Stable Baseline" : "High Usage Detected"}</p>
-      </div>
-      <div class="efficiency-bar"><div class="efficiency-fill" style="width:${Math.max(5, efficiencyScore)}%;"></div></div>
-    </div>
-  `;
-
-  setTimeout(() => {
-    animateNumber(document.getElementById("avgWeekly"), avgWk);
-    animateNumber(document.getElementById("avgMonthly"), avgMo);
-    animateNumber(document.getElementById("avgYearly"), avgYr);
-  }, 100);
+  // Update live gauge if exists
+  const liveFill = document.querySelector('.live-gauge-fill');
+  if (liveFill) {
+    liveFill.style.width = `${loadPercentage}%`;
+    liveFill.style.background = loadRatio > 1.2 ? '#ff4757' : '#00d4ff';
+  }
 }
 
-function renderTrendChart(predictions) {
-  const canvas = document.getElementById("trendChart");
-  if (!canvas || !window.Chart) return;
-  if (liveChart) liveChart.destroy();
+function renderTable(predictions, page = 1) {
+  const tbody = document.getElementById('statsTable');
+  if (!tbody) return;
 
-  const recent = [...predictions].slice(0, 10).reverse();
-  const labels = recent.map((p) => p.company_name || "Entry");
-  const wkData = recent.map((p) => p.week_val || 0);
+  const start = (page - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  const paginated = predictions.slice(start, end);
 
-  liveChart = new Chart(canvas, {
-    type: "bar",
-    data: {
-      labels,
-      datasets: [
-        {
-          label: "Weekly Prediction (kWh)",
-          data: wkData,
-          backgroundColor: "rgba(0, 212, 255, 0.7)",
-          borderColor: "#00d4ff",
-          borderWidth: 2,
-          borderRadius: 5,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { labels: { color: "#e0e0e0" } } },
-      scales: {
-        y: {
-          grid: { color: "rgba(255,255,255,0.1)" },
-          ticks: { color: "#a0a0a0" },
-        },
-        x: { grid: { display: false }, ticks: { color: "#a0a0a0" } },
-      },
-    },
-  });
-}
+  const startIdxEl = document.getElementById('startIndex');
+  const endIdxEl = document.getElementById('endIndex');
+  const totalItemsEl = document.getElementById('totalItems');
 
-function renderDonutChart(predictions) {
-  const canvas = document.getElementById("donutChart");
-  if (!canvas || !window.Chart) return;
-  if (donutChart) donutChart.destroy();
+  if (startIdxEl) startIdxEl.textContent = predictions.length ? start + 1 : 0;
+  if (endIdxEl) endIdxEl.textContent = Math.min(end, predictions.length);
+  if (totalItemsEl) totalItemsEl.textContent = predictions.length;
 
-  const colorMap = {
-    residential:    "#0ea5e9", // Blue
-    industrial:     "#64748b", // Grey
-    agricultural:   "#f59e0b", // Gold
-    commercial:     "#f97316", // Orange
-    street_lighting: "#06b6d4", // Cyan
-    other:          "#22c55e"  // Green
-  };
-
-  const counts = {
-    residential: 0,
-    industrial: 0,
-    agricultural: 0,
-    commercial: 0,
-    street_lighting: 0,
-    other: 0
-  };
-
-  predictions.forEach((p) => {
-    const cat = (p.category || "other").toLowerCase();
-    if (counts.hasOwnProperty(cat)) {
-       counts[cat]++;
-    } else {
-       counts.other++;
-    }
-  });
-
-  const labels = ["Residential", "Industrial", "Agricultural", "Commercial", "Street Lighting", "Other"];
-  const data = labels.map(l => counts[l.toLowerCase().replace(" ", "_")]);
-  const colors = labels.map(l => colorMap[l.toLowerCase().replace(" ", "_")]);
-
-  donutChart = new Chart(canvas, {
-    type: "doughnut",
-    data: {
-      labels,
-      datasets: [
-        {
-          data,
-          backgroundColor: colors,
-          borderWidth: 0,
-          hoverOffset: 15,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: "right",
-          labels: { color: "#e0e0e0", padding: 15, font: { size: 11 } },
-        },
-      },
-      cutout: "65%",
-    },
-  });
-}
-
-function renderGenerationChart() {
-  const canvas = document.getElementById("generationChart");
-  if (!canvas || !window.Chart) return;
-  if (generationChart) generationChart.destroy();
-
-  // Data from user's image reference
-  const labels = ["Thermal", "Hydroelectric", "Nuclear", "Renewable"];
-  const data = [62, 26, 8, 4];
-  const colors = ["#475569", "#00d4ff", "#ff4757", "#00d084"];
-
-  generationChart = new Chart(canvas, {
-    type: "doughnut",
-    data: {
-      labels,
-      datasets: [
-        {
-          data,
-          backgroundColor: colors,
-          borderWidth: 0,
-          hoverOffset: 15,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: "right",
-          labels: { color: "#e0e0e0", padding: 15, font: { size: 11 } },
-        },
-      },
-      cutout: "65%",
-    },
-  });
+  tbody.innerHTML = paginated.map(p => `
+    <tr>
+      <td>${p.company_name}</td>
+      <td><span class="badge">${p.category}</span></td>
+      <td>${p.city}</td>
+      <td>${formatNumber(p.week_val)}</td>
+      <td>${formatNumber(p.month_val)}</td>
+      <td>${formatNumber(p.year_val)}</td>
+      <td><span style="color:var(--electric)">${formatNumber(p.week_val)}</span></td>
+      <td>${formatNumber(p.month_val)}</td>
+      <td>${formatNumber(p.year_val)}</td>
+      <td style="color:${p.growth_pct >= 0 ? 'var(--danger)' : 'var(--success)'}">
+        ${p.growth_pct >= 0 ? '▲' : '▼'} ${Math.abs(p.growth_pct || 0).toFixed(1)}%
+      </td>
+      <td>${new Date(p.created_at).toLocaleDateString()}</td>
+      <td><button class="btn-sm btn-outline" onclick="window.location.href='/prediction?restore_id=${p.id}'">Restore</button></td>
+    </tr>
+  `).join('');
+  
+  // Pagination buttons
+  const prevBtn = document.getElementById('prevPage');
+  const nextBtn = document.getElementById('nextPage');
+  if (prevBtn) prevBtn.disabled = page === 1;
+  if (nextBtn) nextBtn.disabled = end >= predictions.length;
 }
 
 function renderCategoryBreakdown(predictions) {
-  const container = document.getElementById("categoryBreakdown");
+  const container = document.getElementById('categoryBreakdown');
   if (!container) return;
 
-  const groups = {};
-  predictions.forEach((p) => {
-    const cat = p.category || "General";
-    if (!groups[cat]) groups[cat] = { count: 0, totalWk: 0 };
-    groups[cat].count++;
-    groups[cat].totalWk += p.week_val || 0;
+  const cats = {};
+  predictions.forEach(p => {
+    const c = p.category || 'General';
+    if (!cats[c]) cats[c] = { count: 0, total: 0, month: 0, year: 0 };
+    cats[c].count++;
+    cats[c].total += (p.week_val || 0);
+    cats[c].month += (p.month_val || 0);
+    cats[c].year += (p.year_val || 0);
   });
 
-  container.innerHTML = Object.entries(groups)
-    .map(([name, data]) => {
-      const avg = data.totalWk / data.count;
-      const lowerName = name.toLowerCase().replace(" ", "_");
-      
-      let icon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`;
-      
-      if (lowerName === "industrial") {
-          icon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><circle cx="12" cy="14" r="4"></circle><line x1="12" y1="6" x2="12.01" y2="6"></line></svg>`;
-      } else if (lowerName === "commercial") {
-          icon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><path d="M9 22v-4h6v4"></path><path d="M8 6h.01"></path><path d="M16 6h.01"></path><path d="M12 6h.01"></path></svg>`;
-      } else if (lowerName === "residential") {
-          icon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>`;
-      } else if (lowerName === "agricultural") {
-          icon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>`;
-      } else if (lowerName === "street_lighting") {
-          icon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"></path><path d="m4.93 4.93 2.83 2.83"></path><path d="M2 12h4"></path><path d="M12 18v4"></path><path d="M4.93 19.07 7.76 16.24"></path><path d="M22 12h-4"></path><path d="M19.07 4.93 16.24 7.76"></path></svg>`;
-      }
-
-      return `
-      <div class="card cat-card">
+  const html = Object.entries(cats).map(([name, data]) => {
+    const avgW = data.total / data.count;
+    const avgM = data.month / data.count;
+    const icon = name.toLowerCase().includes('comm') ? '🏢' : (name.toLowerCase().includes('ind') ? '🏭' : '🏠');
+    
+    return `
+      <div class="cat-card">
         <div class="cat-header">
-          <span class="cat-icon">${icon}</span>
-          <span class="cat-name">${name}</span>
-          <span class="cat-count">${data.count} entries</span>
+          <div class="cat-icon">${icon}</div>
+          <div class="cat-name">${name}</div>
+          <div class="cat-count">${data.count} Predictions</div>
         </div>
         <div class="cat-metrics">
           <div class="cat-metric">
-            <span class="cat-metric-val">${avg.toFixed(1)}</span>
+            <span class="cat-metric-val">${formatNumber(avgW)}</span>
             <span class="cat-metric-label">Avg Weekly (kWh)</span>
+          </div>
+          <div class="cat-metric">
+            <span class="cat-metric-val">${formatNumber(avgM)}</span>
+            <span class="cat-metric-label">Avg Monthly (kWh)</span>
           </div>
         </div>
       </div>
     `;
-    })
-    .join("");
+  }).join('');
+
+  container.innerHTML = html || '<p style="text-align:center; color:var(--text-muted); padding:20px;">No category data found</p>';
 }
 
-function renderTable(predictions) {
-  const table = document.getElementById("statsTable");
-  if (!table) return;
-  table.innerHTML = "";
-  // Calculate global averages first as fallback
-  let totalWkGlobal = 0;
-  predictions.forEach(p => totalWkGlobal += (p.week_val || 0));
-  const avgGlobalWk = predictions.length > 0 ? totalWkGlobal / predictions.length : 0;
+// ── LIFECYCLE ─────────────────────────────────────────────────
 
-  // Calculate organization-specific averages
-  const orgAverages = {};
-  predictions.forEach(p => {
-    if (!orgAverages[p.company_name]) {
-      orgAverages[p.company_name] = { total: 0, count: 0 };
-    }
-    orgAverages[p.company_name].total += (p.week_val || 0);
-    orgAverages[p.company_name].count++;
-  });
-
-  predictions.forEach((p, idx) => {
-    // Find immediate previous prediction for this company to calculate accurate short-term Growth %
-    let prev = null;
-    for (let i = idx + 1; i < predictions.length; i++) {
-      if (predictions[i].company_name === p.company_name) {
-        prev = predictions[i];
-        break;
-      }
-    }
-    
-    // Determine the baseline to compare against
-    let baselineWk = null;
-    if (prev && prev.week_val > 0) {
-        baselineWk = prev.week_val;
-    } else if (orgAverages[p.company_name] && orgAverages[p.company_name].count > 1) {
-        // Fallback to company average (excluding current) if possible
-        const orgData = orgAverages[p.company_name];
-        baselineWk = (orgData.total - (p.week_val || 0)) / (orgData.count - 1);
-    } else if (avgGlobalWk > 0 && predictions.length > 1) {
-        // Fallback to global average
-        baselineWk = (totalWkGlobal - (p.week_val || 0)) / (predictions.length - 1);
-    }
-
-    let growthVal = "0.0";
-    if (baselineWk && baselineWk > 0) {
-      growthVal = (((p.week_val - baselineWk) / baselineWk) * 100).toFixed(1);
-    }
-
-    let isUp = false;
-    let isDown = false;
-    let growthColor = "#a0a0a0";
-    let growthIcon = "−";
-    let growthDisplayObj = "N/A";
-
-    if (growthVal !== null) {
-      const numGrowth = parseFloat(growthVal);
-      isUp = numGrowth > 0;
-      isDown = numGrowth < 0;
-      growthColor = isUp ? "#ff4757" : isDown ? "#00d084" : "#a0a0a0";
-      growthIcon = isUp ? "▲" : isDown ? "▼" : "−";
-      growthDisplayObj = `${Math.abs(numGrowth).toFixed(1)}%`;
-    }
-
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${p.company_name}</td>
-      <td>${p.category || "General"}</td>
-      <td>${p.city}</td>
-      <td>${((p.week_val || 0) / 1.05).toFixed(2)}</td>
-      <td>${((p.month_val || 0) / 1.03).toFixed(2)}</td>
-      <td>${((p.year_val || 0) / 1.02).toFixed(2)}</td>
-      <td><span style="color:var(--electric);">${(p.week_val || 0).toFixed(2)}</span></td>
-      <td><span style="color:var(--electric);">${(p.month_val || 0).toFixed(2)}</span></td>
-      <td><span style="color:#00d084;">${(p.year_val || 0).toFixed(2)}</span></td>
-      <td><span style="color:${growthColor}; font-weight:700;">${growthIcon} ${growthDisplayObj}</span></td>
-      <td>${new Date(p.created_at).toLocaleDateString()}</td>
-      <td>
-        <button class="btn-outline" style="padding: 4px 12px; font-size: 0.8em; cursor: pointer;" onclick="restorePrediction(${p.id})">
-          Restore
-        </button>
-      </td>
-    `;
-    table.appendChild(row);
-  });
-}
-
-function restorePrediction(id) {
-  // Redirect to prediction page with a restoration ID
-  window.location.href = `/prediction?restore_id=${id}`;
-}
-
-// ───────────────────────────────────────────────────────────────
-//  INIT
-// ───────────────────────────────────────────────────────────────
-document.addEventListener("DOMContentLoaded", async () => {
-  // Let main.js handle the general header/auth UI
-  // But we still need to load predictions
+async function refreshStats() {
   try {
-    const res = await fetch("/api/predictions");
+    const res = await fetch('/api/predictions');
     const data = await res.json();
-    if (data.success && data.predictions) {
-      const predictions = data.predictions;
-      renderModernSummary(predictions);
-      renderTrendChart(predictions);
-      renderDonutChart(predictions);
-      renderGenerationChart();
-      renderCategoryBreakdown(predictions);
-      renderTable(predictions);
+    if (data.success) {
+      allPredictions = data.predictions;
+      
+      updateStatsSummary(allPredictions);
+      initTrendChart(allPredictions);
+      initDonutChart(allPredictions);
+      initCityChart(allPredictions);
+      renderCategoryBreakdown(allPredictions);
+      renderTable(allPredictions, currentPage);
+      
+      // Update empty state
+      const empty = document.getElementById('emptyState');
+      if (empty) empty.style.display = allPredictions.length ? 'none' : 'block';
     }
   } catch (err) {
-    console.error("Stats loading failed", err);
+    console.error("Failed to load statistics:", err);
   }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  refreshStats();
+  
+  // Refresh button
+  document.getElementById('refreshStatsBtn')?.addEventListener('click', () => {
+    refreshStats();
+  });
+
+  // Pagination
+  document.getElementById('prevPage')?.addEventListener('click', () => {
+    if (currentPage > 1) {
+      currentPage--;
+      renderTable(allPredictions, currentPage);
+    }
+  });
+
+  document.getElementById('nextPage')?.addEventListener('click', () => {
+    if (currentPage * itemsPerPage < allPredictions.length) {
+      currentPage++;
+      renderTable(allPredictions, currentPage);
+    }
+  });
+
+  // Chart Tabs
+  document.querySelectorAll('.chart-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      updateTrendMetric(tab.dataset.metric);
+    });
+  });
 });

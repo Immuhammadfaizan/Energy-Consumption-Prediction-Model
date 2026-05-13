@@ -10,142 +10,10 @@
   </head>
 
   <body class="admin-page">
-    <!-- Mobile sidebar (nav carries over from style.css) -->
-    <aside class="sidebar">
-      <ul class="sidebar-menu">
-        <li><a href="/">Home</a></li>
-        <li><a href="/prediction">Prediction</a></li>
-        <li><a href="/statistics">Statistics</a></li>
-        <li><a href="/about">About</a></li>
-        <li
-          style="
-            margin-top: 40px;
-            border-top: 1px solid var(--border);
-            padding-top: 20px;
-          "
-        >
-          <a href="#" id="logoutBtn">Logout</a>
-        </li>
-      </ul>
-    </aside>
-    <div class="sidebar-overlay"></div>
+
 
     <!-- ─── HEADER ─── -->
-    <header>
-      <div class="container header-flex">
-        <button class="menu-toggle" aria-label="Open Menu">&#9776;</button>
-
-        <div class="logo">
-          <img src="/static/images/logo.png" alt="FLUX Logo" />
-          <span>FLUX</span>
-        </div>
-
-        <nav>
-          <ul>
-            <li><a href="/">Home</a></li>
-            <li><a href="/prediction">Prediction</a></li>
-            <li><a href="/statistics">Statistics</a></li>
-            <li><a href="/about">About</a></li>
-          </ul>
-        </nav>
-
-        <div class="auth-buttons">
-          <!-- Profile trigger -->
-          <div class="user-profile-trigger" id="userEmail" title="View Profile">
-            <div class="user-avatar-small" style="width:28px; height:28px; border-width:1.5px;">
-              <img id="headerAvatar" src="/static/images/default-avatar.png" alt="Avatar" />
-            </div>
-            <span id="userFirstName">--</span>
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 12 12"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M1 1L6 6L11 1" />
-            </svg>
-          </div>
-
-          <a href="#" id="logoutBtnHeader" style="display: none">Logout</a>
-
-          <button
-            id="themeToggle"
-            title="Toggle Theme"
-            class="theme-toggle-btn"
-          >
-            <svg
-              class="sun-icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <circle cx="12" cy="12" r="5" />
-              <line x1="12" y1="1" x2="12" y2="3" />
-              <line x1="12" y1="21" x2="12" y2="23" />
-              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-              <line x1="1" y1="12" x2="3" y2="12" />
-              <line x1="21" y1="12" x2="23" y2="12" />
-              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-            </svg>
-            <svg
-              class="moon-icon"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              style="display: none"
-            >
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-            </svg>
-          </button>
-        </div>
-
-        <!-- Profile Popup -->
-        <div id="profilePopup" class="profile-popup" style="display: none">
-          <div class="profile-popup-content">
-            <div class="profile-header">
-              <div class="profile-avatar-container">
-                <img id="popupAvatar" src="/static/images/default-avatar.png" alt="Profile" />
-                <label for="avatarUpload" class="avatar-edit-label" title="Change Photo">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                </label>
-                <input type="file" id="avatarUpload" accept="image/*" style="display: none" />
-              </div>
-              <h3 id="profileName">User Name</h3>
-              <button class="close-popup">&times;</button>
-            </div>
-            <div class="profile-body">
-              <p><strong>Email:</strong> <span id="profileEmail">—</span></p>
-              <p>
-                <strong>Organization:</strong> <span id="profileOrg">—</span>
-              </p>
-              <p><strong>City:</strong> <span id="profileCity">—</span></p>
-              <p>
-                <strong>Role:</strong>
-                <span
-                  id="profileRole"
-                  style="color: var(--electric); font-weight: 700"
-                  >Admin</span
-                >
-              </p>
-            </div>
-            <div class="profile-footer">
-              <button id="profileLogoutBtn" class="btn-danger full-width">
-                Sign Out
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </header>
-
+    {% include "header.html" %}
     <!-- ─── BODY LAYOUT ─── -->
     <div class="admin-container">
       <!-- Admin Sidebar -->
@@ -315,100 +183,115 @@
                     Prediction data visualised in real-time
                   </p>
                 </div>
-                <!-- Chart switcher -->
-                <div class="chart-switcher" id="chartSwitcher">
-                  <button
-                    class="btn-outline admin-chart-tab active"
-                    data-chart="peakUsage"
-                  >
-                    Hourly Usage
-                  </button>
-                  <button
-                    class="btn-outline admin-chart-tab"
-                    data-chart="categoryBreakdown"
-                  >
-                    Categories
-                  </button>
-                  <button
-                    class="btn-outline admin-chart-tab"
-                    data-chart="hourly"
-                  >
-                    Hourly Forecast
-                  </button>
-                  <button
-                    class="btn-outline admin-chart-tab"
-                    data-chart="trendLine"
-                  >
-                    Load Trend
-                  </button>
-                  <button
-                    class="btn-outline admin-chart-tab"
-                    data-chart="rfLive"
-                  >
-                    <span class="rf-status-dot"></span>
-                    RF Live
-                  </button>
+                <!-- Chart actions -->
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <div class="user-filter-wrap">
+                    <button class="btn-filter" id="userFilterBtn">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                      Filter by User
+                    </button>
+                    <div class="user-filter-dropdown" id="userFilterDropdown">
+                      <!-- Populated by JS -->
+                    </div>
+                  </div>
+
+                  <div class="chart-switcher" id="chartSwitcher">
+                    <button class="btn-outline admin-chart-tab active" data-chart="categoryBreakdown">
+                      Categories
+                    </button>
+                    <button class="btn-outline admin-chart-tab" data-chart="hourly">
+                      Hourly Forecast
+                    </button>
+                    <button class="btn-outline admin-chart-tab" data-chart="trendLine">
+                      Load Trend
+                    </button>
+                    <button class="btn-outline admin-chart-tab" data-chart="rfLive">
+                      <span class="rf-status-dot"></span>
+                      RF Live
+                    </button>
+                  </div>
                 </div>
+              </div>
+
+              <!-- Active Filter Banner -->
+              <div class="active-filter-banner" id="activeFilterBanner">
+                <div class="filter-banner-content">
+                  <img src="/static/images/default-avatar.png" id="filterUserAvatar" class="filter-user-avatar">
+                  <div class="filter-text-group">
+                    <span class="filter-label-top">Inference Perspective</span>
+                    <span class="filter-user-name-bold" id="filterUserName">Username</span>
+                    <span class="filter-user-city-sub" id="filterUserMeta">Organization | City</span>
+                  </div>
+                </div>
+                <button class="filter-clear-btn" id="clearFilterBtn">Reset View</button>
               </div>
 
               <!-- Chart canvases -->
               <div class="admin-charts-container" id="adminChartsContainer">
-                <canvas id="peakUsageChart"></canvas>
-                <canvas id="categoryDonutChart" style="display: none"></canvas>
-                <canvas id="trendLineChart" style="display: none"></canvas>
-                <canvas id="hourlyForecastChart" style="display: none"></canvas>
-                <div
-                  id="rfLiveContainer"
-                  style="display: none; position: absolute; inset: 0"
-                >
-                  <canvas
-                    id="rfLiveChart"
-                    style="
-                      width: 100% !important;
-                      height: 100% !important;
-                      position: static !important;
-                    "
-                  ></canvas>
-                  <div class="rf-status-card">
-                    <div
-                      style="
-                        color: var(--text-muted);
-                        font-size: 0.78em;
-                        margin-bottom: 4px;
-                        text-transform: uppercase;
-                        letter-spacing: 0.05em;
-                      "
-                    >
-                      Model Status
+                <div id="categoryDonutContainer" class="admin-chart-canvas-container">
+                  <canvas id="categoryDonutChart"></canvas>
+                </div>
+                <div id="trendLineContainer" class="admin-chart-canvas-container" style="display: none">
+                  <canvas id="trendLineChart"></canvas>
+                </div>
+
+                <div id="hourlyForecastChart" class="admin-chart-canvas-container" style="display: none">
+                  <canvas id="hourlyForecastCanvas"></canvas>
+                  <div class="forecast-insights">
+                    <div class="insight-card">
+                      <span class="insight-tag">Pattern</span>
+                      <span class="insight-title">Residential Peak</span>
+                      <span class="insight-desc">Typical surge between 18:00 - 21:00 due to domestic load.</span>
                     </div>
-                    <div
-                      style="
-                        color: var(--success);
-                        font-weight: 700;
-                        font-size: 0.85em;
-                        margin-bottom: 6px;
-                      "
-                    >
-                      <span class="rf-status-dot"></span>Processing Live
+                    <div class="insight-card">
+                      <span class="insight-tag">Strategy</span>
+                      <span class="insight-title">Baseload Optimization</span>
+                      <span class="insight-desc">Maintain stable grid frequency during off-peak hours (02:00-05:00).</span>
                     </div>
-                    <div
-                      style="
-                        display: flex;
-                        gap: 16px;
-                        color: var(--text-muted);
-                        font-size: 0.8em;
-                      "
-                    >
-                      <span
-                        >Trees:
-                        <strong style="color: var(--electric)"
-                          >300</strong
-                        ></span
-                      >
-                      <span
-                        >Depth:
-                        <strong style="color: var(--electric)">8</strong></span
-                      >
+                  </div>
+                </div>
+
+                <div id="rfLiveContainer" class="admin-chart-canvas-container" style="display: none">
+                  <canvas id="rfLiveChart"></canvas>
+                  <div class="inference-intel">
+                    <div class="intel-header">
+                      <div class="intel-title-group">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--electric)"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                        <h4>RF Diagnostic Console</h4>
+                      </div>
+                      <span class="status-pill info blink">Inference Active</span>
+                    </div>
+
+                    <div class="intel-grid">
+                      <div class="intel-stat">
+                        <span class="intel-label">Model Confidence</span>
+                        <span class="intel-value" id="rfConsensus">98.4%</span>
+                      </div>
+                      <div class="intel-stat">
+                        <span class="intel-label">Parallel Threads</span>
+                        <span class="intel-value" id="rfThreads">8 Nodes</span>
+                      </div>
+                      <div class="intel-stat">
+                        <span class="intel-label">Inference Latency</span>
+                        <span class="intel-value" id="rfLatency">12ms</span>
+                      </div>
+                      <div class="intel-stat">
+                        <span class="intel-label">MSE Loss</span>
+                        <span class="intel-value">0.042</span>
+                      </div>
+                    </div>
+
+                    <div class="intel-spec-row">
+                      <div class="spec-item"><strong>Algorithm:</strong> Random Forest Regressor</div>
+                      <div class="spec-item"><strong>Estimators:</strong> 100 Trees</div>
+                    </div>
+
+                    <div class="intel-log-container">
+                      <div class="log-header">LIVE DECISION PATH STREAM</div>
+                      <div class="intel-log-stream" id="rfLogStream">
+                        <div>[Init] Seeding Decision Trees...</div>
+                        <div>[Ready] Inference Engine Online.</div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -500,8 +383,8 @@
               </div>
             </div>
             <div class="data-table-container">
-              <div style="overflow-x: auto">
-                <table>
+              <div class="table-wrap">
+                <table id="usersMainTable">
                   <thead>
                     <tr>
                       <th>Avatar</th>
@@ -570,8 +453,8 @@
               </button>
             </div>
             <div class="data-table-container">
-              <div style="overflow-x: auto">
-                <table>
+              <div class="table-wrap">
+                <table id="predictionsMainTable">
                   <thead>
                     <tr>
                       <th>Avatar</th>
@@ -795,7 +678,10 @@
                     <span style="color: var(--text-muted)">Active Session Stay</span>
                     <span id="adminSessionTime" style="font-weight: 700; color: var(--electric); font-variant-numeric: tabular-nums; background: rgba(0, 212, 255, 0.1); padding: 4px 10px; border-radius: 12px;">00:00:00</span>
                   </div>
-                  <button type="button" class="btn-secondary" style="margin-top: 14px" onclick="openGlobalIntelligence()">Global Intelligence</button>
+                  <button type="button" class="btn-intel-trigger btn-sm" onclick="openGlobalIntelligence()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;"><path d="M12 2v22M2 12h22M12 2a10 10 0 1 0 10 10 10 10 0 0 0-10-10z"/></svg>
+                    Global Intelligence
+                  </button>
                   <button type="button" class="btn-primary" style="margin-top: 14px" onclick="updateAdminProfile()">Save Changes</button>
                 </form>
               </div>
@@ -873,8 +759,34 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="/static/js/theme.js"></script>
+    <!-- Admin Quick Bar Toggle -->
+    <button class="admin-quick-toggle" id="quickBarToggle" title="Admin Quick Access">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    </button>
+
+    <!-- Admin Quick Bar -->
+    <div class="admin-quick-bar" id="adminQuickBar">
+      <div class="quick-bar-content">
+        <div class="quick-bar-info">
+          <span class="status-dot online"></span>
+          <strong>Console Active</strong>
+          <span class="divider">|</span>
+          <span id="quickBarUserCount">0 Users</span>
+        </div>
+        <div class="quick-bar-actions">
+          <button onclick="loadData()" class="quick-action-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            Refresh Data
+          </button>
+          <button onclick="exportBackup()" class="quick-action-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            Export Logs
+          </button>
+        </div>
+      </div>
+    </div>
+
     <script src="/static/js/auth.js"></script>
-    <script src="/static/js/sidebar.js"></script>
     <script src="/static/js/admin.js"></script>
   </body>
 </html>

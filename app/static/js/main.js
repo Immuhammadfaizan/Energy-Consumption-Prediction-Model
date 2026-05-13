@@ -6,179 +6,21 @@
 "use strict";
 
 window.addEventListener("DOMContentLoaded", () => {
-  updateAuthUI();
-  setupProfilePopup();
-  setupLogoutButtons();
   loadHomeDashboard();
 });
 
-// ── Auth UI ───────────────────────────────────────────────────
-function updateAuthUI() {
-  const user = window.currentUser;
-
-  const userEmailBtn = document.getElementById("userEmail");
-  const firstName    = document.getElementById("userFirstName");
-  const authBtn      = document.getElementById("authBtn");
-  const logoutHeader = document.getElementById("logoutBtnHeader");
-  const logoutSide   = document.getElementById("logoutBtn");
-  const dashboard    = document.getElementById("userDashboard");
-
-  // Admin nav items (both desktop and mobile)
-  const adminNavItem  = document.getElementById("adminNavItem");
-  const adminSideItem = document.getElementById("adminSidebarItem");
-
-  if (user) {
-    const name = user.fullname
-      ? user.fullname.split(" ")[0]
-      : user.email.split("@")[0];
-
-    // Profile trigger button
-    if (userEmailBtn) {
-      userEmailBtn.style.display = "flex";
-    }
-    if (firstName) firstName.textContent = name;
-
-    // Auth buttons
-    if (authBtn)      authBtn.style.display      = "none";
-    if (logoutHeader) logoutHeader.style.display  = "inline-flex";
-    if (logoutSide)   logoutSide.style.display    = "block";
-
-    // Dashboard section (home page only)
-    if (dashboard) dashboard.style.display = "block";
-
-    // Admin nav links
-    const isAdmin = user.is_admin === 1 || user.is_admin === true;
-    if (isAdmin) {
-      if (adminNavItem)  adminNavItem.style.display  = "block";
-      if (adminSideItem) adminSideItem.style.display = "block";
-    }
-
-    // Profile popup fields
-    const pName = document.getElementById("profileName");
-    const pEmail= document.getElementById("profileEmail");
-    const pOrg  = document.getElementById("profileOrg");
-    const pCity = document.getElementById("profileCity");
-    const pRole = document.getElementById("profileRole");
-    if (pName)  pName.textContent  = user.fullname || "User";
-    if (pEmail) pEmail.textContent = user.email    || "—";
-    if (pOrg)   pOrg.textContent   = user.organization || "—";
-    if (pCity)  pCity.textContent  = user.city     || "—";
-    if (pRole)  pRole.textContent  = isAdmin ? "Administrator" : "User";
-
-    // Profile Pictures
-    const avatarPath = user.profile_pic || "/static/images/default-avatar.png";
-    const headerAv = document.getElementById("headerAvatar");
-    const popupAv  = document.getElementById("popupAvatar");
-    const footerAv = document.getElementById("footerAvatar");
-    const footerWrap = document.getElementById("footerUserWrap");
-    const footerName = document.getElementById("footerUserName");
-
-    if (headerAv) headerAv.src = avatarPath;
-    if (popupAv)  popupAv.src  = avatarPath;
-    if (footerAv) footerAv.src = avatarPath;
-    if (footerWrap) footerWrap.style.display = "flex";
-    if (footerName) footerName.textContent = user.fullname || user.email;
-
-  } else {
-    if (userEmailBtn) userEmailBtn.style.display = "none";
-    if (authBtn)      authBtn.style.display = "inline-flex";
-    if (logoutHeader) logoutHeader.style.display = "none";
-    if (logoutSide)   logoutSide.style.display   = "none";
-    if (dashboard)    dashboard.style.display     = "none";
-  }
-}
-
-// ── Profile Popup ─────────────────────────────────────────────
-function setupProfilePopup() {
-  const trigger  = document.getElementById("userEmail");
-  const popup    = document.getElementById("profilePopup");
-  const closeBtn = document.querySelector(".close-popup");
-  const logoutPop= document.getElementById("profileLogoutBtn");
-
-  if (!popup) return;
-
-  if (trigger) {
-    trigger.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const showing = popup.style.display !== "none";
-      popup.style.display = showing ? "none" : "block";
-    });
-  }
-
-  if (closeBtn) {
-    closeBtn.addEventListener("click", () => {
-      popup.style.display = "none";
-    });
-  }
-
-  document.addEventListener("click", (e) => {
-    if (popup && !popup.contains(e.target) && e.target !== trigger && !trigger?.contains(e.target)) {
-      popup.style.display = "none";
-    }
-  });
-
-  // Avatar Upload Handling
-  const uploadInput = document.getElementById("avatarUpload");
-  if (uploadInput) {
-    uploadInput.addEventListener("change", async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const formData = new FormData();
-      formData.append("file", file);
-
-      try {
-        const res = await fetch("/api/profile/upload", {
-          method: "POST",
-          body: formData,
-        });
-        const data = await res.json();
-        if (data.success) {
-          // Update local state
-          window.currentUser.profile_pic = data.profile_pic;
-          localStorage.setItem("currentUser", JSON.stringify(window.currentUser));
-          
-          // Refresh UI
-          updateAuthUI();
-          // Also show a toast if available
-          if (typeof showToast === 'function') showToast("Profile photo updated!");
-        } else {
-          alert(data.error || "Upload failed");
-        }
-      } catch (err) {
-        console.error("Upload error:", err);
-        alert("An error occurred during upload.");
-      }
-    });
-  }
-
-  if (logoutPop) logoutPop.addEventListener("click", doLogout);
-}
-
-// ── Logout ────────────────────────────────────────────────────
-function setupLogoutButtons() {
-  document.getElementById("logoutBtn")?.addEventListener("click", (e) => {
-    e.preventDefault();
-    doLogout();
-  });
-  document.getElementById("logoutBtnHeader")?.addEventListener("click", (e) => {
-    e.preventDefault();
-    doLogout();
-  });
-}
-
-function doLogout() {
-  window.location.href = "/auth/logout";
-}
-
 // ── Home Dashboard ────────────────────────────────────────────
 async function loadHomeDashboard() {
-  const user = window.currentUser;
+  const user = window.currentUser || JSON.parse(localStorage.getItem("currentUser"));
 
   // Hero stat chips — visible to everyone
   await loadHeroStats();
 
   if (!user) return;
+
+  // Un-hide the user dashboard section if logged in
+  const dashboard = document.getElementById("userDashboard");
+  if (dashboard) dashboard.style.display = "block";
 
   // KPI cards
   await loadDashboardKPIs();

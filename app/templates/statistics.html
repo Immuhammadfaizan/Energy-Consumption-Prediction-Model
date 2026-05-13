@@ -16,10 +16,19 @@
     <!-- HERO SECTION -->
     <section class="hero hero-statistics">
       <div class="container">
-        <h1>Energy Statistics &amp; Analysis</h1>
-        <p>
-          Review your organization's energy consumption patterns and forecasts
-        </p>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <h1>Energy Statistics &amp; Analysis</h1>
+            <p>Review your organization's energy consumption patterns and forecasts</p>
+          </div>
+          <div id="refreshContainer">
+            <button id="refreshStatsBtn" class="btn-outline" style="border-radius:30px; padding:10px 25px; display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.05);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+              <span>Refresh Data</span>
+            </button>
+            <p id="cooldownMsg" style="font-size:0.7em; color:var(--text-muted); margin-top:5px; text-align:center; display:none;">Wait <span id="cooldownTimer">30</span>s</p>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -71,10 +80,11 @@
             </div>
             <div class="stat-info">
               <p class="stat-label">Current Predicted Load</p>
-              <p class="stat-value" id="liveWeekVal" style="color: #00d4ff">
-                — kWh
-              </p>
-              <p class="stat-sub">Make a prediction first</p>
+              <p class="stat-value" id="liveWeekVal" style="color: #00d4ff">— kWh</p>
+              <p class="stat-sub">Real time forecast</p>
+              <div class="live-gauge-wrap" style="height:6px; background:rgba(255,255,255,0.1); border-radius:10px; margin-top:8px; overflow:hidden;">
+                <div class="live-gauge-fill" style="width:0%; height:100%; background:var(--electric); transition:width 1s ease;"></div>
+              </div>
             </div>
             <div class="live-pulse"></div>
           </div>
@@ -84,8 +94,8 @@
             </div>
             <div class="stat-info">
               <p class="stat-label">Energy Efficiency Score</p>
-              <p class="stat-value">—</p>
-              <p class="stat-sub">Loading…</p>
+              <p class="stat-value" id="efficiencyVal">—</p>
+              <p class="stat-sub" id="efficiencySub">Calculating…</p>
             </div>
           </div>
         </div>
@@ -93,24 +103,42 @@
         <!-- ══ CHARTS ══ -->
         <h2>Visual Analysis</h2>
         <div class="chart-split">
-          <!-- Trend Bar Chart -->
+          <!-- Trend Multi-Line Chart -->
           <div class="chart-panel">
-            <h3>Consumption Trend (Last 10 Predictions)</h3>
-            <canvas id="trendChart"></canvas>
+            <div class="chart-panel-header">
+              <h3>Consumption Trend</h3>
+              <div class="chart-tab-group">
+                <button class="chart-tab active" data-metric="weekly">Weekly</button>
+                <button class="chart-tab" data-metric="monthly">Monthly Norm.</button>
+                <button class="chart-tab" data-metric="yearly">Yearly Norm.</button>
+                <button class="chart-tab" data-metric="all">All Metrics</button>
+              </div>
+            </div>
+            <div class="chart-wrap" style="position: relative; height: 350px; width: 100%;">
+              <canvas id="trendChart"></canvas>
+            </div>
           </div>
 
-          <!-- Donut — Category Distribution -->
+          <!-- Donut — kWh by Category -->
           <div class="chart-panel">
-            <h3>Consumption by Category</h3>
-            <canvas id="donutChart"></canvas>
-          </div>
-
-          <!-- Generation Sources (NEW) -->
-          <div class="chart-panel">
-            <h3>Generation Sources (2026 Est.)</h3>
-            <canvas id="generationChart"></canvas>
+            <h3>Consumption by Category <small style="font-weight:400;color:var(--text-muted);font-size:0.75em;">(kWh weighted)</small></h3>
+            <div class="chart-wrap" style="position: relative; height: 300px; width: 100%;">
+              <canvas id="donutChart"></canvas>
+            </div>
+            <div id="donutLegendExt" style="margin-top:12px;"></div>
           </div>
         </div>
+
+        <!-- Row 2: City Breakdown (Full Width) -->
+        <div class="chart-full">
+          <div class="chart-panel">
+            <h3>Energy Intensity by City <small style="font-weight:400;color:var(--text-muted);font-size:0.75em;">(avg kWh/week)</small></h3>
+            <div style="position:relative; height:320px; width:100%;">
+              <canvas id="cityChart"></canvas>
+            </div>
+          </div>
+        </div>
+
 
         <!-- ══ PREDICTIONS TABLE ══ -->
         <h2 style="margin-top: 20px">Your Statistics</h2>
@@ -136,6 +164,16 @@
               <tbody id="statsTable"></tbody>
             </table>
           </div>
+          </div>
+          <div id="paginationControls" class="pagination-container" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-top: 1px solid var(--border); background: var(--bg2);">
+            <div class="pagination-info" style="color: var(--text-muted); font-size: 0.9em;">
+              Showing <span id="startIndex">0</span> - <span id="endIndex">0</span> of <span id="totalItems">0</span> predictions
+            </div>
+            <div class="pagination-buttons" style="display: flex; gap: 10px;">
+              <button id="prevPage" class="btn-outline" style="padding: 6px 15px; font-size: 0.85em;">Previous</button>
+              <button id="nextPage" class="btn-primary" style="padding: 6px 15px; font-size: 0.85em;">Next</button>
+            </div>
+          </div>
         </div>
 
         <!-- EMPTY STATE -->
@@ -156,21 +194,18 @@
         </div>
 
         <!-- ══ CATEGORY BREAKDOWN ══ -->
-        <h2 style="margin-top: 60px">Breakdown by Category</h2>
-        <div
-          style="
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 25px;
-          "
-          id="categoryBreakdown"
-        ></div>
+        <div class="breakdown-section container">
+          <h2 class="breakdown-heading">Breakdown by Category</h2>
+          <div class="breakdown-panel">
+            <div id="categoryBreakdown"></div>
+          </div>
+        </div>
       </div>
     </section>
 
     {% include "footer.html" %}
 
-    <!-- Chart.js CDN -->
+    <!-- Chart.js CDN + plugins -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="/static/js/theme.js"></script>
     <script src="/static/js/sidebar.js"></script>

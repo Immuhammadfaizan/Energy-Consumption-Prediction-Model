@@ -3,9 +3,9 @@ import os
 import time
 from werkzeug.utils import secure_filename
 from flask import Blueprint, jsonify, request, session, current_app
-from app.utils.decorators import login_required
+from app.utils.decorators import login_required, admin_required
 from app.models.prediction import Prediction, save_prediction, get_predictions_by_user, get_all_predictions
-from app.models.user import User
+from app.models.user import User, get_user_by_id
 from app.services.predictor import run_prediction
 from app.extensions import db
 
@@ -147,32 +147,23 @@ def get_predictions_count():
     except Exception as e:
         return jsonify({"success": False, "count": 0, "error": str(e)})
 
-# Add Admin endpoints
+# ── ADMIN ENDPOINTS (Restricted) ─────────────────────────────
+
 @api_bp.route('/admin/users')
-@login_required
+@admin_required
 def admin_users():
-    # Only allow admin
-    user = User.query.get(session['user_id'])
-    if not user or not user.is_admin:
-        return jsonify({"success": False, "error": "Unauthorized"}), 403
-        
     users = User.query.all()
     return jsonify({"success": True, "users": [u.to_dict() for u in users]})
 
 @api_bp.route('/admin/predictions')
-@login_required
+@admin_required
 def admin_predictions():
-    # Only allow admin
     preds = get_all_predictions()
     return jsonify({"success": True, "predictions": preds})
 
 @api_bp.route('/admin/users/<int:user_id>/make_admin', methods=['POST'])
-@login_required
+@admin_required
 def admin_make_user_admin(user_id):
-    current_user = User.query.get(session['user_id'])
-    if not current_user or not current_user.is_admin:
-        return jsonify({"success": False, "error": "Unauthorized"}), 403
-        
     target_user = User.query.get(user_id)
     if target_user:
         target_user.is_admin = True
@@ -180,12 +171,8 @@ def admin_make_user_admin(user_id):
     return jsonify({"success": True})
 
 @api_bp.route('/admin/users/<int:user_id>/remove_admin', methods=['POST'])
-@login_required
+@admin_required
 def admin_remove_user_admin(user_id):
-    current_user = User.query.get(session['user_id'])
-    if not current_user or not current_user.is_admin:
-        return jsonify({"success": False, "error": "Unauthorized"}), 403
-        
     target_user = User.query.get(user_id)
     if target_user:
         target_user.is_admin = False
@@ -193,23 +180,15 @@ def admin_remove_user_admin(user_id):
     return jsonify({"success": True})
 
 @api_bp.route('/admin/predictions/all', methods=['DELETE'])
-@login_required
+@admin_required
 def admin_delete_all_predictions():
-    current_user = User.query.get(session['user_id'])
-    if not current_user or not current_user.is_admin:
-        return jsonify({"success": False, "error": "Unauthorized"}), 403
-        
     Prediction.query.delete()
     db.session.commit()
     return jsonify({"success": True})
 
 @api_bp.route('/admin/update_profile', methods=['PUT'])
-@login_required
+@admin_required
 def admin_update_profile():
-    current_user = User.query.get(session['user_id'])
-    if not current_user or not current_user.is_admin:
-        return jsonify({"success": False, "error": "Unauthorized"}), 403
-        
     data = request.json
     fullname = data.get('fullname')
     organization = data.get('organization')
@@ -217,6 +196,7 @@ def admin_update_profile():
     if not fullname or not organization:
         return jsonify({"success": False, "error": "Missing fields"}), 400
         
+    current_user = User.query.get(session['user_id'])
     current_user.fullname = fullname
     current_user.organization = organization
     db.session.commit()
@@ -225,12 +205,8 @@ def admin_update_profile():
     return jsonify({"success": True})
 
 @api_bp.route('/admin/predictions/<int:prediction_id>', methods=['DELETE'])
-@login_required
+@admin_required
 def admin_delete_prediction(prediction_id):
-    current_user = User.query.get(session['user_id'])
-    if not current_user or not current_user.is_admin:
-        return jsonify({"success": False, "error": "Unauthorized"}), 403
-        
     target_pred = Prediction.query.get(prediction_id)
     if target_pred:
         db.session.delete(target_pred)
@@ -238,12 +214,8 @@ def admin_delete_prediction(prediction_id):
     return jsonify({"success": True})
 
 @api_bp.route('/admin/users/<int:user_id>', methods=['DELETE'])
-@login_required
+@admin_required
 def admin_delete_user(user_id):
-    current_user = User.query.get(session['user_id'])
-    if not current_user or not current_user.is_admin:
-        return jsonify({"success": False, "error": "Unauthorized"}), 403
-        
     target_user = User.query.get(user_id)
     if target_user:
         db.session.delete(target_user)
