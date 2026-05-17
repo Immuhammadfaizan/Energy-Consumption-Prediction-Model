@@ -1,8 +1,4 @@
-/* ════════════════════════════════════════════════════════════════*/
-/* ABOUT.CSS - Modern, theme-aware styling */
-/* ════════════════════════════════════════════════════════════════*/
-
-/* ── Hero Section ───────────────────────────────────────────── */
+/* . Hero Section  .*/
 .hero-about {
   padding: 100px 0 80px;
   text-align: center;
@@ -46,7 +42,7 @@
   position: relative;
 }
 
-/* ── Content Sections ───────────────────────────────────────── */
+/* .   Content Sections .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  ─ */
 .section h2 {
   font-size: 2.2em;
   margin-top: 60px;
@@ -72,7 +68,7 @@
   margin-bottom: 16px;
 }
 
-/* ── Cards Grid ─────────────────────────────────────────────── */
+/* .   Cards Grid .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  ─ */
 .about-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -138,7 +134,7 @@
   margin-bottom: 12px;
 }
 
-/* ── Steps / How it works ───────────────────────────────────── */
+/* .   Steps / How it works .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  ─ */
 .step-card {
   text-align: center;
   padding: 40px 30px;
@@ -147,7 +143,11 @@
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 212, 255, 0.02));
+  background: linear-gradient(
+    135deg,
+    rgba(0, 212, 255, 0.1),
+    rgba(0, 212, 255, 0.02)
+  );
   border: 2px solid rgba(0, 212, 255, 0.3);
   color: var(--electric);
   font-size: 1.8em;
@@ -159,7 +159,11 @@
   box-shadow: 0 0 20px rgba(0, 212, 255, 0.1);
 }
 [data-theme="light"] .step-number {
-  background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(14, 165, 233, 0.02));
+  background: linear-gradient(
+    135deg,
+    rgba(14, 165, 233, 0.1),
+    rgba(14, 165, 233, 0.02)
+  );
   border-color: rgba(14, 165, 233, 0.3);
 }
 
@@ -168,7 +172,7 @@
   margin-bottom: 16px;
 }
 
-/* ── Coverage Grid ──────────────────────────────────────────── */
+/* .   Coverage Grid .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .   */
 .coverage-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -189,8 +193,12 @@
   background: rgba(0, 212, 255, 0.05);
   border-color: var(--electric);
 }
-[data-theme="light"] .city-badge { background: rgba(0, 0, 0, 0.02); }
-[data-theme="light"] .city-badge:hover { background: rgba(14, 165, 233, 0.05); }
+[data-theme="light"] .city-badge {
+  background: rgba(0, 0, 0, 0.02);
+}
+[data-theme="light"] .city-badge:hover {
+  background: rgba(14, 165, 233, 0.05);
+}
 
 .city-name {
   color: var(--text);
@@ -209,7 +217,7 @@
   font-family: monospace;
 }
 
-/* ── Benefits Grid ──────────────────────────────────────────── */
+/* .   Benefits Grid .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .   */
 .benefits-wrapper {
   background: var(--card-bg);
   border: 1px solid var(--border);
@@ -234,9 +242,11 @@
   gap: 12px;
   margin-bottom: 12px;
 }
-.benefit-item p { margin: 0; }
+.benefit-item p {
+  margin: 0;
+}
 
-/* ── Contact Info ───────────────────────────────────────────── */
+/* .   Contact Info  .*/
 .contact-info {
   background: linear-gradient(to right, rgba(0, 212, 255, 0.05), transparent);
   border-left: 4px solid var(--electric);
@@ -250,7 +260,9 @@
   gap: 16px;
   margin-bottom: 16px;
 }
-.contact-row:last-child { margin-bottom: 0; }
+.contact-row:last-child {
+  margin-bottom: 0;
+}
 .contact-row strong {
   width: 80px;
   color: var(--text);
@@ -263,7 +275,9 @@
   text-decoration: none;
   font-weight: 600;
 }
-.contact-row a:hover { text-decoration: underline; }
+.contact-row a:hover {
+  text-decoration: underline;
+}
 
 .section p {
   color: var(--text-muted);
@@ -272,7 +286,7 @@
   margin-bottom: 16px;
 }
 
-/* ── Contributors Section ───────────────────────────────────── */
+/* .   Contributors Section .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  ─ */
 .contributor-card {
   cursor: pointer;
   text-align: left;
@@ -336,7 +350,7 @@
   gap: 6px;
 }
 
-/* ── Modal System ───────────────────────────────────────────── */
+/* .   Modal System  .*/
 .contributor-modal {
   position: fixed;
   inset: 0;
@@ -428,4 +442,29 @@
   font-size: 0.85em;
   text-transform: uppercase;
   letter-spacing: 1px;
+}
+
+.modal-contribution-detail ul {
+  list-style-type: none;
+  padding-left: 0;
+  margin-top: 12px;
+}
+
+.modal-contribution-detail ul li {
+  position: relative;
+  padding-left: 20px;
+  margin-bottom: 10px;
+  color: var(--text-muted);
+  font-size: 0.95em;
+  line-height: 1.6;
+}
+
+.modal-contribution-detail ul li::before {
+  content: "•";
+  color: var(--electric);
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-weight: bold;
+  font-size: 1.2em;
 }

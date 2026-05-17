@@ -1,303 +1,138 @@
-# FLUX - Smart Energy Consumption Analytics Platform
+# FLUX - Intelligent Energy Consumption Analytics Platform
 
-## 🚀 Project Overview
+<div align="center">
+  <img src="app/static/images/hero_about.png" alt="FLUX Platform" width="100%">
+</div>
 
-FLUX is a modern, AI-powered energy consumption prediction platform for Pakistan. It leverages machine learning algorithms and real-time weather data (Open-Meteo API) to provide accurate energy consumption forecasts.
+## 🚀 About the Project
 
-## 📁 Project Structure
+**FLUX** is an enterprise-grade, AI-powered energy consumption prediction and analytics platform specifically tailored for Pakistan's energy sector. Built with a robust Flask backend and a modern Glassmorphism frontend, FLUX leverages Machine Learning (Random Forest) and real-time meteorological data to provide highly accurate, actionable energy forecasts. 
 
+The platform allows individuals and organizations to track historical consumption, predict future loads (weekly, monthly, yearly), and make data-driven decisions to optimize energy usage and reduce costs.
+
+## 🛠️ Complete Technology Stack
+
+### Frontend Architecture
+- **Markup & Styling**: HTML5, CSS3 (Custom Variables, Flexbox/Grid, Glassmorphism UI)
+- **Templating Engine**: Jinja2
+- **Interactivity**: Vanilla JavaScript (ES6+)
+- **Data Visualization**: Chart.js (Line, Bar, Radar, Doughnut charts)
+- **Design System**: Dark-navy theme with electric blue (`#00d4ff`) and electric pink (`#ff006e`) accents.
+
+### Backend Development
+- **Framework**: Python / Flask
+- **Architecture**: Application Factory Pattern (`create_app()`), Modular Blueprints (`main_bp`, `auth_bp`, `api_bp`)
+- **Authentication**: Flask-Session, Bcrypt password hashing, Custom decorators (`@login_required`, `@admin_required`)
+- **API Integration**: 16+ RESTful API endpoints
+
+### Database & Storage
+- **Database Engine**: MySQL (XAMPP Setup: Apache + MySQL, phpMyAdmin)
+- **Driver**: PyMySQL
+- **Schema Design**: Relational tables (`users`, `predictions`) with `CASCADE` foreign keys.
+
+### Machine Learning & Algorithms
+- **Algorithm**: Random Forest Regressor (Scikit-Learn)
+- **Data Processing**: Pandas, NumPy, StandardScaler
+- **Model Pipeline**: 11-feature input vector (Historical kWh, Weather parameters, Time factors). Trains 3 distinct models (Weekly, Monthly, Yearly) utilizing 100 decision trees each.
+
+### External Integrations
+- **Weather API**: Open-Meteo REST API (Real-time live weather & 7-day forecasting)
+
+## 📁 Detailed Directory Structure
+
+```text
+energy_analysis/
+├── app/
+│   ├── __init__.py            # Flask app factory (create_app)
+│   ├── models.py              # MySQL database models/schema
+│   ├── routes/                # Application Blueprints
+│   │   ├── main_bp.py         # Core dashboard & prediction routes
+│   │   ├── auth_bp.py         # Login, Registration, Session management
+│   │   └── api_bp.py          # REST API endpoints
+│   ├── services/
+│   │   └── predictor.py       # Random Forest ML pipeline & logic
+│   ├── static/
+│   │   ├── css/               # Modular CSS (admin.css, prediction.css, etc.)
+│   │   ├── images/            # Platform assets and default avatars
+│   │   └── js/                # Client-side scripts (admin.js, auth.js, etc.)
+│   └── templates/             # Jinja2 HTML templates
+│       ├── index.html         # Landing page
+│       ├── login.html         # Authentication
+│       ├── prediction.html    # Core ML interface
+│       ├── statistics.html    # Chart.js analytics dashboard
+│       ├── admin.html         # Admin dashboard & RF Live Console
+│       └── about.html         # Project details & contributors
+├── .env                       # Environment variables & DB config
+├── requirements.txt           # Python dependencies
+└── run.py                     # Application entry point
 ```
-energy_frontend/
-├── index.html                 # Homepage with features overview
-├── login.html                 # User login page
-├── signup.html                # User registration page
-├── prediction.html            # Energy prediction interface
-├── statistics.html            # Statistics and analytics dashboard
-├── about.html                 # About page with company info
-├── admin.html                 # Admin panel (admin only)
-│
-├── css/
-│   ├── style.css             # Main theme and global styles
-│   ├── credential.css        # Login/signup page styles
-│   ├── prediction.css        # Prediction page styles
-│   ├── statistics.css        # Statistics page styles
-│   ├── about.css             # About page styles
-│   └── admin.css             # Admin panel styles
-│
-├── js/
-│   ├── main.js               # Dashboard initialization
-│   ├── auth.js               # Authentication & user management
-│   ├── sidebar.js            # Sidebar navigation functionality
-│   ├── prediction.js         # Prediction logic & API integration
-│   ├── statistics.js         # Statistics calculation & display
-│   ├── about.js              # About page functionality
-│   └── admin.js              # Admin panel functionality
-│
-└── images/
-    └── logo.png              # Company logo
-```
 
-## 🎨 Design Features
+## 🧠 Machine Learning Algorithm & Flow
 
-- **Dark Smoky Theme**: Modern dark background (#0a0e27) with electric blue (#00d4ff) accents
-- **Electric Pink Accent**: Color (#ff006e) for highlights and CTAs
-- **Responsive Sidebar**: Collapsible navigation with smooth animations
-- **Smooth Transitions**: Left-to-right underline hover effects on nav menus
-- **Gradient Background**: Modern gradient backgrounds throughout the site
-- **Glassmorphism**: Semi-transparent effects with blur on header
+The heart of FLUX is its predictive engine, designed to forecast energy consumption based on historical patterns and live environmental data.
 
-### Color Scheme
+1. **Data Ingestion**: The system takes 3 base inputs (Previous Week, Month, and Year kWh usage).
+2. **Weather Enrichment**: The Open-Meteo API fetches live temperature, humidity, wind speed, and cloud cover based on the user's selected city (from a dictionary of 130+ Pakistani cities).
+3. **Feature Engineering**: An 11-feature input vector is constructed (3 historical + 5 weather + 3 time-based features).
+4. **Normalization**: `StandardScaler` standardizes the feature scale to prevent variance distortion.
+5. **Prediction Generation**: Three specialized Random Forest models (100 trees each) compute the weekly, monthly, and yearly forecasts.
+6. **Diagnostics Monitoring**: The Admin panel features an "RF Live" console displaying real-time metrics like Latency, Consensus, and Mean Squared Error (MSE).
 
-- Primary Dark: #0a0e27
-- Secondary Dark: #050812
-- Electric Blue: #00d4ff
-- Electric Pink: #ff006e
-- Success Green: #00d084
-- Light Text: #e0e0e0
-- Gray Text: #a0a0a0
+## 👥 Project Contributors
 
-## 🔐 Authentication System
+The development, research, and deployment of FLUX were successfully executed by the following team:
 
-### Features:
-
-- **User Registration**: Sign up with name, email, organization, password, city, and category
-- **User Login**: Email/password authentication
-- **Session Management**: User data stored in localStorage
-- **Role-Based Access**: Admin-only features with access control
-- **Remember Me**: Optional remember functionality
-
-### Supported Categories:
-
-- Residential
-- Commercial
-- Industrial
-- Agricultural
-
-### Supported Cities (With Coordinates):
-
-- Karachi (24.8607°N, 67.0011°E)
-- Lahore (31.5497°N, 74.3436°E)
-- Islamabad (33.6844°N, 73.0479°E)
-- Rawalpindi (33.5731°N, 73.1815°E)
-- Faisalabad (31.5497°N, 74.3436°E)
-- Multan (30.1575°N, 71.4252°E)
-- Hyderabad (25.3960°N, 68.3578°E)
-- Peshawar (34.0151°N, 71.5249°E)
-- Quetta (30.1798°N, 66.9750°E)
-- Gilgit (35.9271°N, 74.3149°E)
-- Sialkot (32.4914°N, 74.5347°E)
-- Gujranwala (32.1814°N, 74.1857°E)
-- Sargodha (32.0840°N, 72.6711°E)
-- Bahawalpur (29.1938°N, 71.6858°E)
-- Sukkur (27.7064°N, 68.8456°E)
-
-## 🔮 Prediction Features
-
-### Input Parameters:
-
-1. **Company/Organization Name**: Your facility name
-2. **City Selection**: Choose from 15+ Pakistani cities with precise coordinates
-3. **Load Data**: Previous week, month, and year energy consumption
-
-### Prediction Output:
-
-- Next week energy forecast
-- Next month energy forecast
-- Next year energy forecast
-- Growth percentage trend
-- Weather impact analysis (Temperature & Humidity)
-- Visual chart comparing historical vs. predicted data
-
-### Weather Integration:
-
-- **API**: Open-Meteo Free Weather API
-- **Data**: Real-time temperature, humidity, and atmospheric data
-- **Impact**: Weather conditions directly adjust predictions
-
-## 📊 Statistics & Analytics
-
-### Features:
-
-- **Prediction History**: View all your past predictions
-- **Summary Statistics**: Average weekly, monthly, and yearly usage
-- **Category Breakdown**: Analysis by energy category
-- **Growth Tracking**: Monitor consumption trends over time
-- **Detailed Reports**: Export and analyze prediction data
-
-## 👥 Admin Panel
-
-### Accessible Only To:
-
-- Authenticated admin users
-- Users promoted to admin status
-
-### Admin Features:
-
-1. **Dashboard**: Overview of system metrics
-   - Total registered users
-   - Total predictions generated
-   - Active sessions count
-   - System status
-
-2. **User Management**:
-   - View all registered users
-   - User details (name, email, organization, city, category, join date)
-   - Promote users to admin
-   - Delete user accounts
-   - Track login history
-
-3. **Prediction Monitoring**:
-   - View all energy predictions
-   - Track predictions by user and organization
-   - Monitor prediction accuracy over time
-   - Filter by city and date range
-
-4. **System Settings**:
-   - System information
-   - Database status
-   - Backup and restore functionality
-   - Auto-backup timestamp
-
-## 🌐 Navigation Features
-
-### Sidebar Navigation:
-
-- Fixed sidebar (desktop) / Collapsible (mobile)
-- Active page highlighting
-- Admin panel access (for admins only)
-- Quick logout button
-
-### Navigation Menu:
-
-- Home
-- Prediction
-- Statistics
-- About
-
-### Hover Effects:
-
-- Left-to-right underline animation on nav links
-- Gradient color transitions
-- Card elevation on hover
-- Button glow effects
-
-## 📱 Responsive Design
-
-### Breakpoints:
-
-- **Desktop**: 1200px+ (full layout)
-- **Tablet**: 768px - 1199px (adjusted grid)
-- **Mobile**: Below 768px (stacked layout, collapsible sidebar)
-
-### Mobile Features:
-
-- Hamburger menu toggle
-- Collapsible sidebar overlay
-- Touch-friendly button sizing
-- Responsive tables
-- Optimized font sizes
-
-## 🔧 Technical Stack
-
-### Frontend:
-
-- **HTML5**: Semantic markup
-- **CSS3**: Advanced styling with CSS variables
-- **JavaScript ES6+**: Modern vanilla JavaScript
-- **Chart.js**: Data visualization
-
-### Data Storage:
-
-- **localStorage**: User sessions and data persistence
-- **JSON**: Data serialization format
-
-### External APIs:
-
-- **Open-Meteo**: Free weather forecast API
-- **Chart.js CDN**: Chart rendering library
-
-## 🚀 Getting Started
-
-### 1. First Time Setup:
-
-1. Open `index.html` in a web browser
-2. Click "Sign Up" to create an account
-3. Fill in your details and select your city/category
-4. Click "Create Account"
-
-### 2. Making a Prediction:
-
-1. Navigate to "Prediction" page
-2. Enter your organization name
-3. Select your city
-4. Input energy consumption data (week, month, year)
-5. Click "Generate Forecast"
-6. View results and trend chart
-
-### 3. Viewing Statistics:
-
-1. Go to "Statistics" page
-2. Review your prediction history in the table
-3. Check summary statistics at the top
-4. Analyze by category breakdown
-
-### 4. Accessing Admin Panel:
-
-1. Login with an admin account
-2. Click "Admin" button in header
-3. View dashboard, users, and predictions
-4. Manage system settings and backups
-
-## 💡 Key Features Implemented
-
-✅ Modern dark theme with electric blue accents
-✅ Smooth sidebar navigation with animations
-✅ Comprehensive authentication system
-✅ Energy prediction with weather integration
-✅ Statistics and analytics dashboard
-✅ Admin panel with user management
-✅ Responsive design for all devices
-✅ Left-to-right underline hover effects
-✅ 15+ Pakistani cities with coordinates
-✅ Open-Meteo weather API integration
-✅ User activity tracking
-✅ Data backup functionality
-✅ Role-based access control
-✅ Smooth animations and transitions
-
-## 🔐 Security Notes
-
-- Passwords stored in localStorage (client-side only)
-- For production, implement proper backend authentication
-- Use HTTPS for data transmission
-- Never store sensitive data in localStorage
-- Implement proper session management
-- Add CSRF protection
-- Use secure authentication tokens
-
-## 📈 Future Enhancements
-
-- Backend server integration with database
-- Email verification system
-- Password reset functionality
-- Social media login
-- Mobile app version
-- Advanced analytics with ML models
-- Integration with IoT devices
-- Real-time energy monitoring
-- Billing integration
-- API for third-party apps
-
-## 📞 Support
-
-For questions or issues:
-
-- Email: support@energypredict.pk
-- Phone: +92-300-XXX-XXXX
-- Website: www.energypredict.pk
+| Member | Role | Responsibilities |
+| :--- | :--- | :--- |
+| **Sana Shabir**<br>`F22NDOCS1M01029` | ML / Random Forest | Core ML Pipeline, Data Scaling, Model Training |
+| **Laiba Anwar**<br>`F22NDOCS1M01027` | Weather API | API Integration, Data Extraction, Fallback Mechanisms |
+| **Muhammad Faizan**<br>`F22NDOCS1M01010` | Frontend + Backend + DB | Architecture, UI/UX, Flask Backend, Database Schema |
 
 ---
 
-**Version**: 1.0.0  
-**Last Updated**: March 2026  
-**Built with**: HTML5, CSS3, JavaScript ES6+, Chart.js
+### Muhammad Faizan
+`F22NDOCS1M01010` | **Frontend + Flask Backend + MySQL + Integration**
+
+**What He Did:**
+- Flask app factory: `create_app()`, 3 Blueprints (`main_bp`, `auth_bp`, `api_bp`), `db.create_all()`
+- Authentication: bcrypt hashing, Flask sessions, `@login_required`, `@admin_required` decorators
+- 16+ REST API endpoints (predict, weather, profile, admin user/prediction management)
+- MySQL schema: users (12 cols) + predictions (10 cols) with `CASCADE` foreign key
+- XAMPP setup: Apache + MySQL, phpMyAdmin, `.env` config, PyMySQL driver
+- Frontend: 7 HTML pages (Jinja2), 7 CSS files, 8 JS files, dark/light theme toggle
+- Chart.js: line, bar, doughnut charts on Statistics and Admin pages
+- Admin dashboard: KPI cards, user/prediction tables, role promote/demote/delete
+- Profile picture upload, first-user-is-admin rule, mobile sidebar toggle
+- Integrated Sana's RF model + Laiba's weather API into the full web platform
+
+### Sana Shabir
+`F22NDOCS1M01029` | **ML / Random Forest Model & Training**
+
+**What She Did:**
+- Built the full Random Forest pipeline in `app/services/predictor.py`
+- Designed 11-feature input vector (3 kWh values + 5 weather + 3 time features)
+- Generated 300 synthetic training samples with seasonal, weather, and noise factors
+- Applied `StandardScaler` to normalize all features before training
+- Trained 3 RF models (weekly, monthly, yearly) with 100 trees each
+- Computed growth %, 7-day daily forecast, and feature importance breakdown
+- Built fallback defaults when weather API is unavailable
+
+### Laiba Anwar
+`F22NDOCS1M01027` | **Open-Meteo Weather API Integration**
+
+**What She Did:**
+- Identified and integrated Open-Meteo API (free, no API key, REST/JSON)
+- Built `CITY_COORDS` dictionary with GPS coordinates for 130+ Pakistani cities
+- Implemented `fetch_weather(city)` to pull live temperature, humidity, wind, precipitation, cloud cover
+- Extracted 7-day forecast data (avg temp max/min, rain, wind) for the forecast chart
+- Designed fallback defaults (temp=25, humidity=50, wind=10) when API fails
+- Created `/api/weather?city=X` endpoint for live weather card on Prediction page
+- Provided the idea of feeding live weather as ML features (contributes 15–30% predictive power)
+
+---
+
+<div align="center">
+  <p><strong>Version:</strong> 2.0.0 | <strong>Status:</strong> Production Ready</p>
+  <p><em>The Islamia University of Bahawalpur — Bahawalnagar Campus</em></p>
+  <p><em>Developed for Academic Final Year Project (FYP) Evaluation</em></p>
+</div>

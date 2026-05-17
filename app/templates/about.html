@@ -750,7 +750,7 @@
         <h2>Project Contributors</h2>
         <div class="about-grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); margin-bottom: 60px">
           <!-- Muhammad Faizan -->
-          <div class="about-card contributor-card" onclick="openContributor('Muhammad Faizan', 'F22NDOCS1M01010', 'Muhammad Faizan served as the lead architectural developer for the platform. He was primarily responsible for the end to end implementation of the Random Forest machine learning regressor and the development of the primary administrative dashboard. His technical focus ensured the successful integration of complex data processing pipelines and the creation of a responsive user interface that supports real time decision making.')">
+          <div class="about-card contributor-card" onclick="openContributor('Muhammad Faizan', 'F22NDOCS1M01010', 'Frontend + Flask Backend + MySQL + Integration', '<ul><li>Flask app factory: create_app(), 3 Blueprints, db.create_all()</li><li>Authentication: bcrypt hashing, Flask sessions, login decorators</li><li>16+ REST API endpoints (predict, weather, profile, admin)</li><li>MySQL schema: users + predictions with CASCADE foreign key</li><li>XAMPP setup: Apache + MySQL, phpMyAdmin, .env config</li><li>Frontend: 7 HTML pages (Jinja2), 7 CSS, 8 JS files</li><li>Chart.js: line, bar, doughnut charts on Statistics and Admin pages</li><li>Admin dashboard: KPI cards, user tables, role management</li><li>Integrated Sana\'s RF model + Laiba\'s weather API into the full web platform</li></ul>')">
             <div class="contributor-avatar">MF</div>
             <div class="contributor-id">F22NDOCS1M01010</div>
             <h3>Muhammad Faizan</h3>
@@ -761,7 +761,7 @@
           </div>
 
           <!-- Laiba Anwar -->
-          <div class="about-card contributor-card" onclick="openContributor('Laiba Anwar', 'F22NDOCS1M01027', 'Laiba Anwar spearheaded the foundational research and system documentation efforts. She played a critical role in the acquisition and preprocessing of regional energy datasets while meticulously crafting the comprehensive technical documentation for the project. Her work provided the necessary academic depth and operational clarity required for the system deployment and user training phases.')">
+          <div class="about-card contributor-card" onclick="openContributor('Laiba Anwar', 'F22NDOCS1M01027', 'Open-Meteo Weather API Integration', '<ul><li>Identified and integrated Open-Meteo API (free, REST/JSON)</li><li>Built CITY_COORDS dictionary with GPS coordinates for 130+ Pakistani cities</li><li>Implemented fetch_weather(city) to pull live temperature, humidity, wind, etc.</li><li>Extracted 7-day forecast data for the forecast chart</li><li>Designed fallback defaults when API fails</li><li>Created /api/weather endpoint for live weather card</li><li>Provided the idea of feeding live weather as ML features (contributes 15-30% predictive power)</li></ul>')">
             <div class="contributor-avatar">LA</div>
             <div class="contributor-id">F22NDOCS1M01027</div>
             <h3>Laiba Anwar</h3>
@@ -772,7 +772,7 @@
           </div>
 
           <!-- Sana Shabir -->
-          <div class="about-card contributor-card" onclick="openContributor('Sana Shabir', 'F22NDOCS1M01029', 'Sana Shabir managed the critical backend infrastructure and data integrity protocols. She led the development of the MySQL database architecture and the integration of live meteorological APIs to support continuous data synchronization. Her focus on quality assurance and system testing was essential for verifying the reliability of the predictive outcomes across multiple geographic locations.')">
+          <div class="about-card contributor-card" onclick="openContributor('Sana Shabir', 'F22NDOCS1M01029', 'ML / Random Forest Model & Training', '<ul><li>Built the full Random Forest pipeline in app/services/predictor.py</li><li>Designed 11-feature input vector (3 kWh values + 5 weather + 3 time features)</li><li>Generated 300 synthetic training samples with seasonal, weather, and noise factors</li><li>Applied StandardScaler to normalize all features before training</li><li>Trained 3 RF models (weekly, monthly, yearly) with 100 trees each</li><li>Computed growth %, 7-day daily forecast, and feature importance breakdown</li><li>Built fallback defaults when weather API is unavailable</li></ul>')">
             <div class="contributor-avatar">SS</div>
             <div class="contributor-id">F22NDOCS1M01029</div>
             <h3>Sana Shabir</h3>
@@ -829,17 +829,19 @@
           <h2 id="modalName">Name Here</h2>
         </div>
         <div class="modal-contribution-detail">
-          <strong>Key Contributions</strong>
-          <p id="modalDetail">Detail content goes here in professional humanized English.</p>
+          <strong id="modalRole" style="color: var(--accent); font-size: 1.1em; display: block; margin-bottom: 16px;">Role Here</strong>
+          <strong>What They Did</strong>
+          <div id="modalDetail" style="margin-top: 12px; line-height: 1.8;">Detail content goes here in professional humanized English.</div>
         </div>
       </div>
     </div>
 
     <script>
-      function openContributor(name, id, detail) {
+      function openContributor(name, id, role, detail) {
         document.getElementById('modalName').innerText = name;
         document.getElementById('modalID').innerText = id;
-        document.getElementById('modalDetail').innerText = detail;
+        document.getElementById('modalRole').innerText = role;
+        document.getElementById('modalDetail').innerHTML = detail;
         document.getElementById('contributorModal').classList.add('active');
         document.body.style.overflow = 'hidden';
       }
