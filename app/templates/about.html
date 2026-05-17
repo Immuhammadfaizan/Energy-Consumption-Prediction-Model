@@ -746,9 +746,45 @@
           </div>
         </div>
 
+        <!-- PROJECT CONTRIBUTORS -->
+        <h2>Project Contributors</h2>
+        <div class="about-grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); margin-bottom: 60px">
+          <!-- Muhammad Faizan -->
+          <div class="about-card contributor-card" onclick="openContributor('Muhammad Faizan', 'F22NDOCS1M01010', 'Muhammad Faizan served as the lead architectural developer for the platform. He was primarily responsible for the end to end implementation of the Random Forest machine learning regressor and the development of the primary administrative dashboard. His technical focus ensured the successful integration of complex data processing pipelines and the creation of a responsive user interface that supports real time decision making.')">
+            <div class="contributor-avatar">MF</div>
+            <div class="contributor-id">F22NDOCS1M01010</div>
+            <h3>Muhammad Faizan</h3>
+            <div class="contributor-view-btn">
+              <span>View Contributions</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </div>
+          </div>
+
+          <!-- Laiba Anwar -->
+          <div class="about-card contributor-card" onclick="openContributor('Laiba Anwar', 'F22NDOCS1M01027', 'Laiba Anwar spearheaded the foundational research and system documentation efforts. She played a critical role in the acquisition and preprocessing of regional energy datasets while meticulously crafting the comprehensive technical documentation for the project. Her work provided the necessary academic depth and operational clarity required for the system deployment and user training phases.')">
+            <div class="contributor-avatar">LA</div>
+            <div class="contributor-id">F22NDOCS1M01027</div>
+            <h3>Laiba Anwar</h3>
+            <div class="contributor-view-btn">
+              <span>View Contributions</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </div>
+          </div>
+
+          <!-- Sana Shabir -->
+          <div class="about-card contributor-card" onclick="openContributor('Sana Shabir', 'F22NDOCS1M01029', 'Sana Shabir managed the critical backend infrastructure and data integrity protocols. She led the development of the MySQL database architecture and the integration of live meteorological APIs to support continuous data synchronization. Her focus on quality assurance and system testing was essential for verifying the reliability of the predictive outcomes across multiple geographic locations.')">
+            <div class="contributor-avatar">SS</div>
+            <div class="contributor-id">F22NDOCS1M01029</div>
+            <h3>Sana Shabir</h3>
+            <div class="contributor-view-btn">
+              <span>View Contributions</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </div>
+          </div>
+        </div>
+
         <!-- CONTACT -->
-        <h2>Contact & Support</h2>
-        <div
+        <h2>Contact & Support</h2>        <div
           class="about-card"
           style="padding: 0; display: flex; flex-wrap: wrap"
         >
@@ -783,8 +819,37 @@
 
     {% include "footer.html" %}
 
-    <script src="/static/js/theme.js"></script>
-    <script src="/static/js/sidebar.js"></script>
+    <!-- CONTRIBUTOR MODAL -->
+    <div class="contributor-modal" id="contributorModal">
+      <div class="modal-backdrop" onclick="closeContributor()"></div>
+      <div class="modal-body">
+        <button class="modal-close" onclick="closeContributor()">&times;</button>
+        <div class="modal-header-large">
+          <span class="contributor-id" id="modalID">ID HERE</span>
+          <h2 id="modalName">Name Here</h2>
+        </div>
+        <div class="modal-contribution-detail">
+          <strong>Key Contributions</strong>
+          <p id="modalDetail">Detail content goes here in professional humanized English.</p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function openContributor(name, id, detail) {
+        document.getElementById('modalName').innerText = name;
+        document.getElementById('modalID').innerText = id;
+        document.getElementById('modalDetail').innerText = detail;
+        document.getElementById('contributorModal').classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+      function closeContributor() {
+        document.getElementById('contributorModal').classList.remove('active');
+        document.body.style.overflow = 'auto';
+      }
+    </script>
+
+    <script src="/static/js/theme.js"></script>    <script src="/static/js/sidebar.js"></script>
     <script src="/static/js/auth.js"></script>
     <script src="/static/js/main.js"></script>
   </body>
