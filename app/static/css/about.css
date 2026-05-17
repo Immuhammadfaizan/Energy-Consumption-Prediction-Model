@@ -381,6 +381,8 @@
   position: relative;
   width: 100%;
   max-width: 500px;
+  max-height: 85vh; /* Added to restrict height */
+  overflow-y: auto; /* Enable vertical scrolling */
   background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: 16px;
@@ -388,6 +390,25 @@
   transform: scale(0.95) translateY(10px);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 32px 80px rgba(0, 0, 0, 0.8);
+}
+
+/* ── Custom Scrollbar for Modal ── */
+.modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: var(--electric);
+  border-radius: 8px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
 }
 
 .contributor-modal.active .modal-body {
