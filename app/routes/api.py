@@ -109,35 +109,34 @@ def upload_profile():
         return jsonify({"success": False, "error": "No file part"}), 400
     
     file = request.files['file']
-    if file.filename == '':
+    if not file or not file.filename:
         return jsonify({"success": False, "error": "No selected file"}), 400
 
-    if file:
-        filename = secure_filename(file.filename)
-        ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
-        if ext not in ['jpg', 'jpeg', 'png', 'gif']:
-            return jsonify({"success": False, "error": "Invalid file type. Only JPG, PNG, GIF allowed."}), 400
+    filename = secure_filename(file.filename)
+    ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
+    if ext not in ['jpg', 'jpeg', 'png', 'gif']:
+        return jsonify({"success": False, "error": "Invalid file type. Only JPG, PNG, GIF allowed."}), 400
 
-        # Unique filename: user_id_timestamp.ext
-        new_filename = f"user_{session['user_id']}_{int(time.time())}.{ext}"
-        
-        # Ensure directory exists (just in case)
-        upload_dir = os.path.join(current_app.root_path, 'static', 'uploads', 'profiles')
-        if not os.path.exists(upload_dir):
-            os.makedirs(upload_dir)
+    # Unique filename: user_id_timestamp.ext
+    new_filename = f"user_{session['user_id']}_{int(time.time())}.{ext}"
+    
+    # Ensure directory exists (just in case)
+    upload_dir = os.path.join(current_app.root_path, 'static', 'uploads', 'profiles')
+    if not os.path.exists(upload_dir):
+        os.makedirs(upload_dir)
 
-        file_path = os.path.join(upload_dir, new_filename)
-        file.save(file_path)
+    file_path = os.path.join(upload_dir, new_filename)
+    file.save(file_path)
 
-        # Update DB
-        user = User.query.get(session['user_id'])
-        if user:
-            relative_path = f"/static/uploads/profiles/{new_filename}"
-            user.profile_pic = relative_path
-            db.session.commit()
-            return jsonify({"success": True, "profile_pic": relative_path})
-        
-        return jsonify({"success": False, "error": "User not found"}), 404
+    # Update DB
+    user = User.query.get(session['user_id'])
+    if user:
+        relative_path = f"/static/uploads/profiles/{new_filename}"
+        user.profile_pic = relative_path
+        db.session.commit()
+        return jsonify({"success": True, "profile_pic": relative_path})
+    
+    return jsonify({"success": False, "error": "User not found"}), 404
 
 @api_bp.route('/predictions/count')
 def get_predictions_count():
@@ -179,6 +178,17 @@ def admin_remove_user_admin(user_id):
         db.session.commit()
     return jsonify({"success": True})
 
+@api_bp.route('/admin/users/<int:user_id>/toggle_role', methods=['POST'])
+@admin_required
+def admin_toggle_user_role(user_id):
+    target_user = User.query.get(user_id)
+    if target_user:
+        target_user.is_admin = not target_user.is_admin
+        db.session.commit()
+        return jsonify({"success": True, "is_admin": target_user.is_admin})
+    return jsonify({"success": False, "error": "User not found"}), 404
+
+
 @api_bp.route('/admin/predictions/all', methods=['DELETE'])
 @admin_required
 def admin_delete_all_predictions():
@@ -197,6 +207,9 @@ def admin_update_profile():
         return jsonify({"success": False, "error": "Missing fields"}), 400
         
     current_user = User.query.get(session['user_id'])
+    if not current_user:
+        return jsonify({"success": False, "error": "User not found"}), 404
+        
     current_user.fullname = fullname
     current_user.organization = organization
     db.session.commit()
