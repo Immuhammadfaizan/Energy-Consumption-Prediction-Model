@@ -23,12 +23,13 @@ def predict():
     city      = data.get('city', 'karachi')
     company   = data.get('company_name', 'Unknown')
     category  = data.get('category', 'general')
+    csv_info  = data.get('csv_info', None)
 
     if week_kwh <= 0 or month_kwh <= 0 or year_kwh <= 0:
         return jsonify({"success": False, "error": "All kWh values must be greater than 0"}), 400
 
     try:
-        result = run_prediction(week_kwh, month_kwh, year_kwh, city, category)
+        result = run_prediction(week_kwh, month_kwh, year_kwh, city, category, csv_info=csv_info)
         result['company_name'] = company
         # Save to DB - include full result for restoration
         save_prediction(

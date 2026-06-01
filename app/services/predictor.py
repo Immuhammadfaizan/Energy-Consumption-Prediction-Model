@@ -290,7 +290,7 @@ FEATURE_NAMES = [
 
 
 def run_prediction(week_kwh: float, month_kwh: float, year_kwh: float,
-                   city: str, category: str = "general") -> dict:
+                   city: str, category: str = "general", csv_info: dict | None = None) -> dict:
     """
     Full Random Forest prediction pipeline.
     Returns predictions + model explanation.
@@ -345,8 +345,8 @@ def run_prediction(week_kwh: float, month_kwh: float, year_kwh: float,
 
     # 5. 7-day daily forecast (for the live chart)
     daily_forecasts = []
-    temp_max = weather.get("avg_temp_max", weather["temperature"] + 3)
-    temp_min = weather.get("avg_temp_min", weather["temperature"] - 5)
+    temp_max = weather.get("avg_temp_max") or (weather["temperature"] + 3)
+    temp_min = weather.get("avg_temp_min") or (weather["temperature"] - 5)
     
     for d in range(7):
         day_temp = temp_min + (temp_max - temp_min) * (0.3 + 0.7 * np.random.rand())
@@ -399,4 +399,5 @@ def run_prediction(week_kwh: float, month_kwh: float, year_kwh: float,
         "daily_forecasts": daily_forecasts,
         "feature_importance": feature_importance,
         "explanation": explanation,
+        "csv_info": csv_info,
     }

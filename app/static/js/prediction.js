@@ -109,8 +109,27 @@ async function runPrediction(e) {
   const category = document.getElementById("category")?.value || "general";
 
   if (!weekKwh || !monthKwh || !yearKwh) {
-    showAlert("Please fill in all three historical kWh fields.", "error");
+    showAlert("Please fill in all three historical kWh fields or upload a CSV file.", "error");
     return;
+  }
+
+  // Calculate CSV contribution if active
+  let csvInfo = null;
+  if (csvParsedValues) {
+    const diffW = Math.abs(weekKwh - csvParsedValues.week) / (csvParsedValues.week || 1);
+    const diffM = Math.abs(monthKwh - csvParsedValues.month) / (csvParsedValues.month || 1);
+    const diffY = Math.abs(yearKwh - csvParsedValues.year) / (csvParsedValues.year || 1);
+    
+    const avgDiff = (diffW + diffM + diffY) / 3;
+    const contribution = Math.max(0, Math.min(100, Math.round((1 - avgDiff) * 100)));
+    
+    csvInfo = {
+      filename: csvParsedValues.filename,
+      row_count: csvParsedValues.row_count,
+      avg_kwh: csvParsedValues.avg_kwh,
+      total_kwh: csvParsedValues.total_kwh,
+      contribution: contribution
+    };
   }
 
   // Connectivity Check
@@ -150,6 +169,7 @@ async function runPrediction(e) {
         city,
         company_name: company,
         category,
+        csv_info: csvInfo
       }),
     });
     clearTimeout(timeoutId);
@@ -255,6 +275,27 @@ function renderResults(data, company, cityKey) {
   const w = data.weather;
   const exp = data.explanation;
   const city = CITIES[cityKey] || { name: cityKey, lat: "—", lon: "—" };
+
+  // ── CSV Contribution Badge ────────────────────────────────
+  const existingBadge = document.getElementById("csvContributionBadge");
+  if (existingBadge) existingBadge.remove();
+  
+  if (data.csv_info) {
+    const badge = document.createElement("div");
+    badge.id = "csvContributionBadge";
+    badge.className = "csv-contribution-badge";
+    badge.innerHTML = `
+      <svg class="csv-badge-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="16" y1="13" x2="8" y2="13"></line>
+        <line x1="16" y1="17" x2="8" y2="17"></line>
+        <polyline points="10 9 9 9 8 9"></polyline>
+      </svg>
+      <span>CSV Data Integrated: <strong>${data.csv_info.contribution}%</strong> (${data.csv_info.filename} — ${data.csv_info.row_count} readings)</span>
+    `;
+    panel.insertBefore(badge, panel.querySelector("#predSummary"));
+  }
 
   // ── Prediction summary cards ──────────────────────────────
   const summaryEl = document.getElementById("predSummary");
@@ -573,9 +614,223 @@ function toggleHistory(force) {
 }
 
 // ═══════════════════════════════════════════════════════════════
+//  CSV UPLOAD STATE & PARSING
+// ═══════════════════════════════════════════════════════════════
+let uploadedCsvFile = null;
+let csvParsedValues = null;
+
+function initCsvUpload() {
+  const dropZone = document.getElementById("csvDropZone");
+  const fileInput = document.getElementById("csvFileInput");
+  const uploadContent = document.getElementById("csvUploadContent");
+  const preview = document.getElementById("csvPreview");
+  const fileNameSpan = document.getElementById("csvFileName");
+  const clearBtn = document.getElementById("csvClearBtn");
+  const statsDiv = document.getElementById("csvStats");
+
+  if (!dropZone || !fileInput) return;
+
+  // Browse click
+  dropZone.addEventListener("click", (e) => {
+    if (e.target.closest("#csvClearBtn") || e.target.closest(".csv-browse-link") || e.target.closest("a")) {
+      return;
+    }
+    fileInput.click();
+  });
+
+  const browseLink = dropZone.querySelector(".csv-browse-link");
+  if (browseLink) {
+    browseLink.addEventListener("click", (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      fileInput.click();
+    });
+  }
+
+  // File selected
+  fileInput.addEventListener("change", (e) => {
+    if (e.target.files.length > 0) {
+      handleCsvFile(e.target.files[0]);
+    }
+  });
+
+  // Drag and drop event listeners
+  ["dragenter", "dragover"].forEach((eventName) => {
+    dropZone.addEventListener(eventName, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropZone.classList.add("drag-over");
+    }, false);
+  });
+
+  ["dragleave", "drop"].forEach((eventName) => {
+    dropZone.addEventListener(eventName, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropZone.classList.remove("drag-over");
+    }, false);
+  });
+
+  dropZone.addEventListener("drop", (e) => {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    if (files.length > 0) {
+      handleCsvFile(files[0]);
+    }
+  });
+
+  // Clear button click
+  if (clearBtn) {
+    clearBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      clearCsv();
+    });
+  }
+}
+
+function handleCsvFile(file) {
+  if (!file.name.endsWith(".csv")) {
+    showAlert("Please upload a valid CSV file (.csv)", "error");
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const text = e.target.result;
+    parseCsvData(file, text);
+  };
+  reader.readAsText(file);
+}
+
+function parseCsvData(file, text) {
+  const lines = text.split(/\r?\n/);
+  if (lines.length < 2) {
+    showAlert("The CSV file is empty or does not contain headers.", "error");
+    return;
+  }
+
+  // Parse headers
+  const headers = lines[0].split(",").map(h => h.trim().toLowerCase());
+  
+  // Find kWh / load index
+  let kwhIndex = headers.findIndex(h => h.includes("kwh") || h.includes("load") || h.includes("energy") || h.includes("consumption") || h.includes("reading") || h.includes("value"));
+  
+  if (kwhIndex === -1) {
+    kwhIndex = 1; // Default fallback to second column
+  }
+
+  const readings = [];
+  let totalKwh = 0;
+  
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+    
+    const columns = line.split(",");
+    if (columns.length > kwhIndex) {
+      const val = parseFloat(columns[kwhIndex]);
+      if (!isNaN(val)) {
+        readings.push(val);
+        totalKwh += val;
+      }
+    }
+  }
+
+  if (readings.length === 0) {
+    showAlert("Could not find any numeric energy readings in the CSV file.", "error");
+    return;
+  }
+
+  const avgKwh = totalKwh / readings.length;
+  let computedWeek = avgKwh * 7;
+  let computedMonth = avgKwh * 30;
+  let computedYear = avgKwh * 365;
+
+  uploadedCsvFile = file;
+  csvParsedValues = {
+    week: Math.round(computedWeek),
+    month: Math.round(computedMonth),
+    year: Math.round(computedYear),
+    filename: file.name,
+    row_count: readings.length,
+    avg_kwh: Math.round(avgKwh),
+    total_kwh: Math.round(totalKwh),
+    readings: readings.slice(0, 100)
+  };
+
+  // Populate input fields
+  const wkInput = document.getElementById("weekLoad") || document.getElementById("prevWeekLoad");
+  const moInput = document.getElementById("monthLoad") || document.getElementById("prevMonthLoad");
+  const yrInput = document.getElementById("yearLoad") || document.getElementById("prevYearLoad");
+
+  if (wkInput) wkInput.value = csvParsedValues.week;
+  if (moInput) moInput.value = csvParsedValues.month;
+  if (yrInput) yrInput.value = csvParsedValues.year;
+
+  // Show preview
+  const dropZone = document.getElementById("csvDropZone");
+  const uploadContent = document.getElementById("csvUploadContent");
+  const preview = document.getElementById("csvPreview");
+  const fileNameSpan = document.getElementById("csvFileName");
+  const statsDiv = document.getElementById("csvStats");
+
+  if (dropZone) dropZone.classList.add("has-file");
+  if (uploadContent) uploadContent.style.display = "none";
+  if (preview) preview.style.display = "block";
+  if (fileNameSpan) fileNameSpan.textContent = file.name;
+
+  if (statsDiv) {
+    statsDiv.innerHTML = `
+      <div class="csv-stat-item">
+        <span class="csv-stat-value">${readings.length}</span>
+        <span class="csv-stat-label">Days Read</span>
+      </div>
+      <div class="csv-stat-item">
+        <span class="csv-stat-value">${Math.round(avgKwh).toLocaleString()}</span>
+        <span class="csv-stat-label">Daily Avg (kWh)</span>
+      </div>
+      <div class="csv-stat-item">
+        <span class="csv-stat-value">${Math.round(computedWeek).toLocaleString()}</span>
+        <span class="csv-stat-label">Weekly Extrapolated</span>
+      </div>
+    `;
+  }
+
+  showAlert(`Successfully loaded ${file.name}! Calculated values have been auto-filled.`, "success");
+}
+
+function clearCsv() {
+  uploadedCsvFile = null;
+  csvParsedValues = null;
+
+  const dropZone = document.getElementById("csvDropZone");
+  const uploadContent = document.getElementById("csvUploadContent");
+  const preview = document.getElementById("csvPreview");
+  const fileInput = document.getElementById("csvFileInput");
+  const statsDiv = document.getElementById("csvStats");
+
+  if (dropZone) dropZone.classList.remove("has-file");
+  if (uploadContent) uploadContent.style.display = "block";
+  if (preview) preview.style.display = "none";
+  if (fileInput) fileInput.value = "";
+  if (statsDiv) statsDiv.innerHTML = "";
+
+  // Clear inputs
+  const wkInput = document.getElementById("weekLoad") || document.getElementById("prevWeekLoad");
+  const moInput = document.getElementById("monthLoad") || document.getElementById("prevMonthLoad");
+  const yrInput = document.getElementById("yearLoad") || document.getElementById("prevYearLoad");
+
+  if (wkInput) wkInput.value = "";
+  if (moInput) moInput.value = "";
+  if (yrInput) yrInput.value = "";
+}
+
+// ═══════════════════════════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════════════════════════
 document.addEventListener("DOMContentLoaded", () => {
+  initCsvUpload();
   const form = document.getElementById("predictionForm");
   if (form) form.addEventListener("submit", runPrediction);
 
